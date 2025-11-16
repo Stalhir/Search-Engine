@@ -1,7 +1,7 @@
 #pragma once
 #include <thread>
 #include <functional>
-#include "safe_queue/SafeQueue.h"
+#include "SafeQueue.h"
 #include <atomic>
 
 class ThreadPool
