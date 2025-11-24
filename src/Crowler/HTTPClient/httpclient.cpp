@@ -16,7 +16,7 @@ httpclient::httpclient(asio::io_context& ioc) : ioc(ioc)
 
 
 
-void httpclient::download(std::string host,std::string port, std::string target)
+std::string httpclient::download(std::string host,std::string port, std::string target)
 {
     //Настроить отлов ошибок надо
     //
@@ -43,7 +43,6 @@ void httpclient::download(std::string host,std::string port, std::string target)
         ec = beast::error_code(static_cast<int>(::ERR_get_error()),
                              asio::error::get_ssl_category());
         std::cerr << "SNI error: " << ec.message() << std::endl;
-        return;
     }
     std::cout<<"SNI okey" << std::endl;
 
@@ -54,11 +53,10 @@ void httpclient::download(std::string host,std::string port, std::string target)
 
 
     http::read(stream, buffer, resp);
-    std::cout << resp << std::endl;
-
 
     beast::get_lowest_layer(stream).close();
 
+    return resp.body();
 }
 
 httpclient::~httpclient()

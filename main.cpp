@@ -2,6 +2,7 @@
 #include <pqxx/pqxx>
 #include <boost/beast.hpp>
 #include "include/httpclient.h"
+#include "Indexer.h"
 #include  <thread>
 
 int main()
@@ -19,20 +20,18 @@ int main()
     boost::asio::io_context ioc;
 
     httpclient httpclient(ioc);
-    //httpclient.download("123","","");
-    std::thread t1([&httpclient]() {
-        httpclient.download("habr.com", "443", "/ru/articles/227575/");
-    });
-
-    std::thread t2([&httpclient]() {
-    httpclient.download("portal.librus.pl", "443", "/rodzina");
-    });
+    indexer indexer_;
+    /*
     std::thread t3([&httpclient]() {
     httpclient.download("github.com", "443", "/olipramarcin/taskflow/blob/main/LICENSE");
     });
-
-
-    t1.join();
-    t2.join();
     t3.join();
+    */
+
+    std::string test = httpclient.download("en.wikipedia.org", "443", "/wiki/Main_Page");
+
+    std::cout<< test << std::endl;
+
+    indexer_.GetHrefs(test);
+
 }

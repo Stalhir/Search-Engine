@@ -27,6 +27,10 @@ set(OPENSSL_LIBRARIES
 
 
 add_subdirectory(lib/libpqxx libpqxx-build)
+
+add_library(pugixml lib/pugixml/src/pugixml.cpp)
+target_include_directories(pugixml PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/lib/pugixml/src)
+
 add_executable(Search_Engine main.cpp src/Initializer/INI_parser/INI_parser.cpp
         src/Crowler/HTTPClient/httpclient.cpp
         include/SafeQueue.h
@@ -34,17 +38,22 @@ add_executable(Search_Engine main.cpp src/Initializer/INI_parser/INI_parser.cpp
         src/DataBase_Interfejs/DBInterfejs.cpp
         src/Initializer/initializer.cpp
         src/Crowler/Сrowler.cpp
+        src/Crowler/Indexer/Indexer.cpp
+        lib/pugixml/src/pugixml.cpp #компылыруэм
 )
 
 target_include_directories(Search_Engine PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/include
         ${CMAKE_CURRENT_SOURCE_DIR}/src
+        #${CMAKE_CURRENT_SOURCE_DIR}/lib/pugixml/src
         ${OPENSSL_INCLUDE_DIR}
 )
+
 
 target_link_libraries(Search_Engine PRIVATE Boost::headers)
 target_compile_features(Search_Engine PRIVATE cxx_std_17)
 target_link_libraries(Search_Engine PRIVATE pqxx)
+target_link_libraries(Search_Engine PRIVATE pugixml)
 target_link_libraries(Search_Engine PRIVATE ${OPENSSL_LIBRARIES})
         if(WIN32)
     target_link_libraries(Search_Engine PRIVATE ws2_32 wsock32)
