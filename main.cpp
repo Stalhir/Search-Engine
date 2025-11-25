@@ -7,7 +7,7 @@
 
 int main()
 {
-
+    SetConsoleOutputCP(CP_UTF8);
     HMODULE ssl = LoadLibraryA("libssl-3-x64.dll");
     HMODULE crypto = LoadLibraryA("libcrypto-3-x64.dll");
 
@@ -21,17 +21,14 @@ int main()
 
     httpclient httpclient(ioc);
     indexer indexer_;
-    /*
-    std::thread t3([&httpclient]() {
-    httpclient.download("github.com", "443", "/olipramarcin/taskflow/blob/main/LICENSE");
-    });
-    t3.join();
-    */
 
-    std::string test = httpclient.download("en.wikipedia.org", "443", "/wiki/Main_Page");
+
+    std::string test = httpclient.download("www.iana.org", "443", "/help/example-domains");
+
+    test = indexer_.DelHTML(test);
 
     std::cout<< test << std::endl;
 
-    indexer_.GetHrefs(test);
+    //indexer_.GetHrefs(test);
 
 }

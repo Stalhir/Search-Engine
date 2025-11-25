@@ -19,7 +19,7 @@ httpclient::httpclient(asio::io_context& ioc) : ioc(ioc)
 std::string httpclient::download(std::string host,std::string port, std::string target)
 {
     //Настроить отлов ошибок надо
-    //
+    // добавь timeout'ы
     beast::error_code ec;
     asio::ip::tcp::resolver resolver_(ioc);//днс ресольвер
     asio::ssl::stream<beast::tcp_stream> stream(ioc,ctx);
