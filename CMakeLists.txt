@@ -35,11 +35,13 @@ add_executable(Search_Engine main.cpp src/Initializer/INI_parser/INI_parser.cpp
         src/Crowler/HTTPClient/httpclient.cpp
         include/SafeQueue.h
         src/Crowler/ThreadPool/threadpool.cpp
-        src/DataBase_Interfejs/DBInterfejs.cpp
+        src/DataBase_Interfejs/DataBase.cpp
         src/Initializer/initializer.cpp
         src/Crowler/Сrowler.cpp
         src/Crowler/Indexer/Indexer.cpp
-        lib/pugixml/src/pugixml.cpp #компылыруэм
+        lib/pugixml/src/pugixml.cpp
+        src/Search_Engine/SearchEngine.cpp
+        src/DataBase_Interfejs/DataBase.cpp
 )
 
 target_include_directories(Search_Engine PRIVATE

@@ -3,7 +3,7 @@
 #include <vector>
 #include <iostream>
 #include <algorithm>
-#include  "locale.h"
+//#include  "boost/locale.hpp"
 #include "pugixml.hpp"
 
 indexer::indexer() {
@@ -82,7 +82,7 @@ std::string indexer::DelHTML(std::string response)
 
 std::string indexer::RefactorText(std::string response)
 {
-
+    //boost::locale::to_lower(response);
 
     return response;
 }
