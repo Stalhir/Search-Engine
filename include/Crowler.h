@@ -1,5 +1,6 @@
 #pragma once
 #include "httpclient.h"
+#include "Indexer.h"
 #include "threadpool.h"
 #include <string>
 

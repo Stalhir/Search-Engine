@@ -19,7 +19,7 @@ private:
 
     SearchEngine SetForSE();
 
-    Crowler SetForCrowler();
+    Crowler&& SetForCrowler();
 public:
 
     InitSearchEngine();

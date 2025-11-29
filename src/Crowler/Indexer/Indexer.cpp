@@ -3,8 +3,9 @@
 #include <vector>
 #include <iostream>
 #include <algorithm>
-//#include  "boost/locale.hpp"
+#include  <boost/locale.hpp>
 #include "pugixml.hpp"
+#include "SYMBOLS.h"
 
 indexer::indexer() {
 
@@ -82,14 +83,16 @@ std::string indexer::DelHTML(std::string response)
 
 std::string indexer::RefactorText(std::string response)
 {
-    //boost::locale::to_lower(response);
+    boost::locale::to_lower(response);
+
+
 
     return response;
 }
 
-std::vector<std::string> indexer::SeparateWorlds(std::string response)
+std::vector<std::pair<std::string, int>> indexer::SeparateWorlds(std::string response)
 {
-    std::vector<std::string> words;
+    std::vector<std::pair<std::string, int>> words;
 
 
     return words;

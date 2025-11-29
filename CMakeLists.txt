@@ -6,9 +6,13 @@ set(PostgreSQL_ADDITIONAL_VERSIONS "17")
 
 set(BOOST_ROOT "C:/Users/askoy/Desktop/search engine/lib/boost")
 set(BOOST_INCLUDEDIR "${BOOST_ROOT}/include")
-set(BOOST_LIBRARYDIR "${BOOST_ROOT}/lib")
+set(BOOST_LIBRARYDIR "${BOOST_ROOT}/stage/lib")
 
 find_package(Boost REQUIRED)
+
+link_directories(${BOOST_LIBRARYDIR})
+include_directories(${BOOST_ROOT})
+
 
 message(STATUS "Boost version: ${Boost_VERSION}")
 message(STATUS "Boost include dir: ${Boost_INCLUDE_DIRS}")
@@ -39,9 +43,10 @@ add_executable(Search_Engine main.cpp src/Initializer/INI_parser/INI_parser.cpp
         src/Initializer/initializer.cpp
         src/Crowler/Сrowler.cpp
         src/Crowler/Indexer/Indexer.cpp
-        lib/pugixml/src/pugixml.cpp
+        #lib/pugixml/src/pugixml.cpp
         src/Search_Engine/SearchEngine.cpp
         src/DataBase_Interfejs/DataBase.cpp
+        include/SYMBOLS.h
 )
 
 target_include_directories(Search_Engine PRIVATE
@@ -53,6 +58,8 @@ target_include_directories(Search_Engine PRIVATE
 
 
 target_link_libraries(Search_Engine PRIVATE Boost::headers)
+#target_link_libraries(Search_Engine PRIVATE Boost::locale)
+#target_link_libraries(Search_Engine PRIVATE Boost::system  )
 target_compile_features(Search_Engine PRIVATE cxx_std_17)
 target_link_libraries(Search_Engine PRIVATE pqxx)
 target_link_libraries(Search_Engine PRIVATE pugixml)

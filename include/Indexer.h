@@ -4,9 +4,6 @@
 
 // План:
 /*
-1. Достаём ссылки | почти
-2. Убираем теги html | есть
-3. Убираем знаки припинания опускаем всё в нижний регистр |
 4. убираем все слова Не соответсвующих параметрам(НАписаны в  ТЗ) |
 5. делим на отдельные слова .. передаём бд |
 */
@@ -28,7 +25,7 @@ public:
 
     std::string RefactorText(std::string response);
 
-    std::vector<std::string> SeparateWorlds(std::string response);
+    std::vector<std::pair<std::string, int>> SeparateWorlds(std::string response);
 
     void AddToDB(std::vector<std::string> words);
 };

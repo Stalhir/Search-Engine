@@ -15,7 +15,7 @@ class httpclient : public std::enable_shared_from_this<httpclient>// помог�
 {
 private:
     boost::asio::ssl::context ctx{asio::ssl::context::tlsv12_client};
-    asio::io_context& ioc; // Надо потом зарефакторить код что бы выглядило всё норм и у download было меньше ответсвенности
+    asio::io_context& ioc;
 
 public:
     httpclient(asio::io_context& ioc);
