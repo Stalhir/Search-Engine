@@ -61,6 +61,7 @@ std::string httpclient::download(std::string host,std::string port, std::string 
 
         beast::get_lowest_layer(stream).close();
 
+        std::cout<<"All okey" << std::endl;
         return resp.body();
     }
     catch (beast::error_code& ec) {

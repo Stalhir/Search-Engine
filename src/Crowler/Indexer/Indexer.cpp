@@ -15,6 +15,7 @@ std::vector<std::string> indexer::ParsingURL(std::string url)
 {
 std::vector<std::string> parsed_url;
 std::string host, port, target;
+bool ThisOnlyTarget{false};
 
     if (url.find("http://") != std::string::npos){
         port = "80";
@@ -26,14 +27,22 @@ std::string host, port, target;
     }
     else
     {
-    // эт может быть типо таргет для директории надо придумать чё с таким делать
+        ThisOnlyTarget = true;
+    }
+
+    if(!ThisOnlyTarget)
+    {
+        host = url.substr(0,url.find("/"));
+        url.erase(0, url.find("/"));
+    }
+    else
+    {
+        host = "";
+        port = "";
+        target = url;
     }
 
 
-    host = url.substr(0,url.find("/"));
-    url.erase(0, url.find("/"));
-
-    target = url;
 
     parsed_url.push_back(host);
     parsed_url.push_back(port);
@@ -65,7 +74,7 @@ std::vector<std::string> indexer::GetHrefs(std::string response)// бывает 
 }
 
 std::string indexer::DelHTML(std::string response)
-{
+{//настроить чтоб HEAD вырезался полностью
     bool in_tag{};
     std::string result;
 
@@ -83,11 +92,33 @@ std::string indexer::DelHTML(std::string response)
 
 std::string indexer::RefactorText(std::string response)
 {
-    boost::locale::to_lower(response);
+    std::string result;
 
+    bool IsSpec{false};
 
+    for (char c : response)
+    {
+        IsSpec = false;
+        for (char s : spec_symbols::special_chars)
+        {
+            if (c == s)
+            {
+                IsSpec = true;
+                break;
+            }
+        }
+        if (!IsSpec)
+        {
+        result += c;
+        }
+    }
 
-    return response;
+std::transform(result.begin(), result.end(), result.begin(), [](unsigned char c)
+{
+    return std::tolower(c);
+});
+
+return result;
 }
 
 std::vector<std::pair<std::string, int>> indexer::SeparateWorlds(std::string response)

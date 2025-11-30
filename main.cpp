@@ -26,6 +26,7 @@ int main()
     std::string test = httpclient.download("www.iana.org", "443", "/help/example-domains");
 
     test = indexer_.DelHTML(test);
+    test = indexer_.RefactorText(test);
 
     std::cout<< test << std::endl;
 
