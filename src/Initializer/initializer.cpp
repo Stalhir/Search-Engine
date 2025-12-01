@@ -1,5 +1,5 @@
 #include "initializer.h"
-
+#include <pqxx/pqxx>
 
 
 
@@ -32,7 +32,14 @@ SearchEngine InitSearchEngine::SetForSE()
 return SearchEngine();
 }
 
-DataBase InitSearchEngine::SetForDB()
-{
-return DataBase();
+DataBase InitSearchEngine::SetForDB() {
+    std::string init = "host=" + settings[0] + " "
+    "port=" + settings[1] + " "
+    "name=" + settings[2] + " "
+    "login=" + settings[3] + " "
+    "password=" + settings[4] + " ";
+
+    pqxx::connection c(init);
+
+return DataBase(c);
 }
