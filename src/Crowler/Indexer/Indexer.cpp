@@ -11,6 +11,16 @@ indexer::indexer() {
 
 }
 
+
+std::vector<std::string> indexer::FixAndCheckURL(std::vector<std::string> BasicUrl , std::vector<std::string> SeparateURL) // берёт ссылку и если она относительная например то поправляет на основе той что вошла в индексер
+{
+
+// BasicUrl это всё вместе с адресом если например у нас относительная ссылка
+
+
+    return SeparateURL;
+}
+
 std::vector<std::string> indexer::ParsingURL(std::string url)
 {
 std::vector<std::string> parsed_url;
@@ -154,7 +164,18 @@ std::unordered_map<std::string, int> indexer::SeparateWords(std::string response
     return words;
 }
 
-void indexer::AddToDB(std::vector<std::string> words)
+void indexer::AddToDB(std::unordered_map<std::string, int> words)
 {
 
+}
+
+
+void indexer::Index(std::string response, std::vector<std::string> url)
+{
+    std::vector<std::string> hrefs = GetHrefs(response);
+
+    std::string result = DelHTML(response);
+    result = RefactorText(result);
+
+    AddToDB(SeparateWords(result));
 }

@@ -22,10 +22,12 @@ void InitSearchEngine::GetSettings()
     settings.push_back(parser.getvalue("search_engine","port"));
 }
 
+/*
 Crowler&& InitSearchEngine::SetForCrowler() // rvalue чтоб сразу принималось.
 {
 return Crowler();
 }
+*/
 
 SearchEngine InitSearchEngine::SetForSE()
 {

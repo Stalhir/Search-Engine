@@ -7,7 +7,9 @@
 
 int main()
 {
+    std::cout<< "Is work" ;
     SetConsoleOutputCP(CP_UTF8);
+
     HMODULE ssl = LoadLibraryA("libssl-3-x64.dll");
     HMODULE crypto = LoadLibraryA("libcrypto-3-x64.dll");
 
@@ -17,19 +19,19 @@ int main()
     }
     std::cout << "OpenSSL DLL loaded successfully!" << std::endl;
 
-    boost::asio::io_context ioc;
 
-    httpclient httpclient(ioc);
+
+    httpclient httpclient;
     indexer indexer_;
 
 
-    std::string test = httpclient.download("www.iana.org", "443", "/help/example-domains");
+    //std::string test = httpclient.download("www.iana.org", "443", "/help/example-domains");
 
-    test = indexer_.DelHTML(test);
-    test = indexer_.RefactorText(test);
-    indexer_.SeparateWords(test);
+    //test = indexer_.DelHTML(test);
+    //test = indexer_.RefactorText(test);
+    //indexer_.SeparateWords(test);
 
-    std::cout<< test << std::endl;
+    //std::cout<< test << std::endl;
 
     //indexer_.GetHrefs(test);
 

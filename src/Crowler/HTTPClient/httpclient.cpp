@@ -10,7 +10,7 @@ namespace beast = boost::beast;
 namespace http = beast::http;
 namespace asio = boost::asio;
 
-httpclient::httpclient(asio::io_context& ioc) : ioc(ioc)
+httpclient::httpclient()
 {
 
 }
@@ -24,6 +24,7 @@ std::string httpclient::download(std::string host,std::string port, std::string 
     //ДОбавить чтоб при HTTP он не делал шифрование
     try {
         beast::error_code ec;
+        asio::io_context ioc;
         asio::ip::tcp::resolver resolver_(ioc);//днс ресольвер
         asio::ssl::stream<beast::tcp_stream> stream(ioc,ctx);
         beast::flat_buffer buffer;
