@@ -27,6 +27,7 @@ int main()
 
     test = indexer_.DelHTML(test);
     test = indexer_.RefactorText(test);
+    indexer_.SeparateWords(test);
 
     std::cout<< test << std::endl;
 

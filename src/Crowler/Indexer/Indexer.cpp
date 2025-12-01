@@ -121,10 +121,35 @@ std::transform(result.begin(), result.end(), result.begin(), [](unsigned char c)
 return result;
 }
 
-std::vector<std::pair<std::string, int>> indexer::SeparateWorlds(std::string response)
+std::unordered_map<std::string, int> indexer::SeparateWords(std::string response)
 {
-    std::vector<std::pair<std::string, int>> words;
+    std::unordered_map<std::string, int> words;
 
+    std::string word;
+
+    // создаём строку А. цикл проходящий по всей строке респонс. Далее игнорируем каждый пробел и не записываем их. Видим что то кроме пробела смотрим растояния до следующего.
+    // если оно соответствует тз проверяем нету ли этой строки в массиве и либо добовляем либо увеличиваем счётчик в уже существующем элементе. Если не соответствует скипаем. А также чистим строку
+
+    int step = 0;
+    int skipCount = 0;
+
+    for (char c : response)
+    {
+       if (c != ' ' && skipCount <= 0)
+       {
+           auto it = std::find(response.begin()+step, response.end(), ' ');
+           int distance = std::distance(response.begin()+step, it);
+           if (distance < 32 && distance > 3)
+           {
+               word = std::string(response.begin()+step, it);//скип слов дописать надо
+               words[word]++;
+           }
+           skipCount = distance;
+       }
+
+    skipCount--;
+    step++;
+    }
 
     return words;
 }

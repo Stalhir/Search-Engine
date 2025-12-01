@@ -1,7 +1,7 @@
 #pragma once
 #include <string>
 #include <vector>
-
+#include <unordered_map>
 // План:
 /*
 4. убираем все слова Не соответсвующих параметрам(НАписаны в  ТЗ) |
@@ -25,7 +25,7 @@ public:
 
     std::string RefactorText(std::string response);
 
-    std::vector<std::pair<std::string, int>> SeparateWorlds(std::string response);
+    std::unordered_map<std::string, int> SeparateWords(std::string response);
 
     void AddToDB(std::vector<std::string> words);
 };
