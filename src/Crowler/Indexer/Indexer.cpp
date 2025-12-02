@@ -12,27 +12,32 @@ indexer::indexer() {
 }
 
 
-std::vector<std::string> indexer::FixAndCheckURL(std::vector<std::string> BasicUrl , std::vector<std::string> SeparateURL) // берёт ссылку и если она относительная например то поправляет на основе той что вошла в индексер
+ParsedUrl indexer::FixAndCheckURL(ParsedUrl BasicUrl , ParsedUrl SeparateURL) // берёт ссылку и если она относительная например то поправляет на основе той что вошла в индексер
 {
 
-// BasicUrl это всё вместе с адресом если например у нас относительная ссылка
-
+// BasicUrl это изначальная ссылка. Приминяется например когда у нас относительная ссылка
+    if (SeparateURL.port == "" || SeparateURL.host == "")
+    {
+        SeparateURL.port = BasicUrl.port;
+        SeparateURL.host = BasicUrl.host;
+    }
 
     return SeparateURL;
 }
 
-std::vector<std::string> indexer::ParsingURL(std::string url)
+ParsedUrl indexer::ParsingURL(std::string url)
 {
-std::vector<std::string> parsed_url;
-std::string host, port, target;
+
+ParsedUrl parsed_url;
+
 bool ThisOnlyTarget{false};
 
     if (url.find("http://") != std::string::npos){
-        port = "80";
+        parsed_url.port = "80";
         url.erase(url.find("http://"), 7);
     }
     else if (url.find("https://") != std::string::npos) {
-        port = "443";
+        parsed_url.port = "443";
         url.erase(url.find("https://"), 8);
     }
     else
@@ -42,24 +47,28 @@ bool ThisOnlyTarget{false};
 
     if(!ThisOnlyTarget)
     {
-        host = url.substr(0,url.find("/"));
+        parsed_url.host = url.substr(0,url.find("/"));
         url.erase(0, url.find("/"));
     }
     else
     {
-        host = "";
-        port = "";
-        target = url;
+        parsed_url.host = "";
+        parsed_url.port = "";
+        parsed_url.target = url;
     }
 
 
-
-    parsed_url.push_back(host);
-    parsed_url.push_back(port);
-    parsed_url.push_back(target);
 return parsed_url;
 }
 
+std::string indexer::DelHead(std::string response)
+{
+
+response.erase(response.find("<head>"), response.find("</head>"));
+
+
+return response;
+}
 
 std::vector<std::string> indexer::GetHrefs(std::string response)// бывает короче так.. Что нам нужно заходить в глубь тоесть без адреса и тд.
 //Нужно короче просто сохранять гдет адрес и текущий таргет сайта где хрaнить
@@ -76,7 +85,7 @@ std::vector<std::string> indexer::GetHrefs(std::string response)// бывает 
     for (auto     attr : hrefs) {
         std::string url = attr.attribute().value();
 
-        std::cout << "URL: " << url << std::endl;
+        //std::cout << "URL: " << url << std::endl;
 
         test.push_back(url);
     }
@@ -166,15 +175,18 @@ std::unordered_map<std::string, int> indexer::SeparateWords(std::string response
 
 void indexer::AddToDB(std::unordered_map<std::string, int> words)
 {
-
+std::cout << words.size() << std::endl;
 }
 
 
-void indexer::Index(std::string response, std::vector<std::string> url)
+void indexer::Index(std::string response, ParsedUrl url)
 {
-    std::vector<std::string> hrefs = GetHrefs(response);
+    //std::vector<std::string> hrefs = GetHrefs(response);
 
-    std::string result = DelHTML(response);
+
+    std::string result = DelHead(response);
+
+    result = DelHTML(result);
     result = RefactorText(result);
 
     AddToDB(SeparateWords(result));
