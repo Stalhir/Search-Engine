@@ -14,13 +14,17 @@ namespace asio = boost::asio;
 class httpclient : public std::enable_shared_from_this<httpclient>// помогает shader_ptr вернуть указатель на самого себя
 {
 private:
-    boost::asio::ssl::context ctx{asio::ssl::context::tlsv12_client};
-
+    //boost::asio::ssl::context ctx{asio::ssl::context::tlsv12_client};
+    std::mutex mutex;
 
 public:
     httpclient();
 
     std::string download(std::string host,std::string port, std::string target);
+
+    std::string download_http(std::string host, std::string target);
+
+    std::string download_https(std::string host, std::string target);
 
     ~httpclient();
 private:

@@ -3,6 +3,7 @@
 #include "Indexer.h"
 #include "threadpool.h"
 #include <string>
+#include <unordered_set>
 #include <vector>
 
 class Crowler
@@ -11,6 +12,8 @@ private:
 httpclient& connects;
 indexer& indexer_;
 ThreadPool& threadPool;
+std::unordered_set<std::string> visited_urls;
+std::mutex visited_mutex;
 // Добавить проверку visited URLs
 int maxDeep; // Work выполняет работу. в нём для ссылок
 public: //FOR TEST THIS PRIVATE
@@ -19,7 +22,15 @@ void Work(ParsedUrl url, int deep); // прокидывается в пулл п
 
 void AddWork(std::string page, ParsedUrl BasicUrl, int deep);
 
+std::string Crowler::MakeUrlKey( ParsedUrl url);
+
+bool TryAddUrl(std::string url_key);
+
+
+
     public:
+
+    void AddInitialUrl(const ParsedUrl& url);
 
     Crowler(httpclient& client, indexer& idx, ThreadPool& pool, int maxDeep);
 

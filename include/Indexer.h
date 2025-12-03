@@ -31,6 +31,8 @@ public:
 
     ParsedUrl FixAndCheckURL(ParsedUrl BasicUrl , ParsedUrl SeparateURL);
 
+    bool CheckExtension(ParsedUrl url);
+
     std::string DelHead(std::string response);
 
     std::vector<std::string> GetHrefs(std::string response);

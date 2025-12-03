@@ -25,6 +25,12 @@ ParsedUrl indexer::FixAndCheckURL(ParsedUrl BasicUrl , ParsedUrl SeparateURL) //
     return SeparateURL;
 }
 
+bool indexer::CheckExtension(ParsedUrl url)
+{
+
+return false;
+}
+
 ParsedUrl indexer::ParsingURL(std::string url)
 {
 
@@ -64,8 +70,12 @@ return parsed_url;
 std::string indexer::DelHead(std::string response)
 {
 
-response.erase(response.find("<head>"), response.find("</head>"));
 
+if(response.find("<head>") != std::string::npos
+   && response.find("</head>") != std::string::npos)
+{
+response.erase(response.find("<head>"), response.find("</head>"));
+}
 
 return response;
 }
@@ -85,7 +95,7 @@ std::vector<std::string> indexer::GetHrefs(std::string response)// бывает 
     for (auto     attr : hrefs) {
         std::string url = attr.attribute().value();
 
-        //std::cout << "URL: " << url << std::endl;
+        std::cout << "URL: " << url << std::endl;
 
         test.push_back(url);
     }
@@ -184,10 +194,12 @@ void indexer::Index(std::string response, ParsedUrl url)
     //std::vector<std::string> hrefs = GetHrefs(response);
 
 
-    std::string result = DelHead(response);
-
+    std::string result = DelHead(response); // file без head - прога умирает
+    std::cout<< "DelHead okey" << std::endl;
     result = DelHTML(result);
+    std::cout<< "DelHTML okey" << std::endl;
     result = RefactorText(result);
-
+    std::cout<< "RefactorText okey" << std::endl;
     AddToDB(SeparateWords(result));
+    std::cout<< "Index okey" << std::endl;
 }

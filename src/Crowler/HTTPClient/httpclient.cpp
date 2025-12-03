@@ -12,10 +12,20 @@ namespace asio = boost::asio;
 
 httpclient::httpclient()
 {
-
+    asio::ssl::context ctx(asio::ssl::context::tls_client);
+    ctx.set_default_verify_paths();
+    ctx.set_verify_mode(asio::ssl::verify_peer);
 }
 
+std::string httpclient::download_http(std::string host, std::string target)
+{
+    return target;
+}
 
+std::string httpclient::download_https(std::string host, std::string target)
+{
+return target;
+}
 
 std::string httpclient::download(std::string host,std::string port, std::string target)
 {
@@ -26,7 +36,24 @@ std::string httpclient::download(std::string host,std::string port, std::string 
         beast::error_code ec;
         asio::io_context ioc;
         asio::ip::tcp::resolver resolver_(ioc);//днс ресольвер
-        asio::ssl::stream<beast::tcp_stream> stream(ioc,ctx);
+        //std::lock_guard<std::mutex> lock(mutex);
+        /* Ошибка «handshake: длина пакета слишком длинная (рутины SSL)» [asio.ssl:167772358] может возникать,
+         * когда сервер настроен для обработки HTTP-запросов через порт 443, а не протокола HTTPS*/
+
+        static thread_local asio::ssl::context tls_ctx(asio::ssl::context::tls_client);
+
+            tls_ctx.set_default_verify_paths();
+            tls_ctx.set_verify_mode(asio::ssl::verify_none);
+            SSL_CTX_set_max_cert_list(tls_ctx.native_handle(), 100 * 1024);
+
+            // Инициализация OpenSSL для этого потока
+            SSL_library_init();
+            OpenSSL_add_all_algorithms();
+            SSL_load_error_strings();
+
+
+
+        asio::ssl::stream<beast::tcp_stream> stream(ioc,tls_ctx);
         beast::flat_buffer buffer;
         http::request<http::string_body> req;
         http::response<http::string_body> resp;
@@ -67,8 +94,13 @@ std::string httpclient::download(std::string host,std::string port, std::string 
     }
     catch (beast::error_code& ec) {
         std::cerr << ec.message() << std::endl;
+        return "";
+    }
+    catch (std::exception& e) {
+        std::cerr << e.what() << std::endl;
     }
 }
+
 
 httpclient::~httpclient()
 {
