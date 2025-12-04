@@ -24,9 +24,9 @@ try
 
     httpclient httpclient;
     indexer indexer_;
-    ThreadPool pool(16);
+    ThreadPool pool(1);
 
-    Crowler TEST(httpclient, indexer_, pool,2);
+    Crowler TEST(httpclient, indexer_, pool,10);
 
     ParsedUrl testurl;
     testurl.host = "www.rfc-editor.org";
@@ -48,7 +48,7 @@ try
     //httpclient.download("www.rfc-editor.org", "443", "/rfc/rfc2606.html");
     // ѕ–ќ¬≈–я“№ HTML ли это также когда корнева€ ссылка таргету ставить значение "/"
 
-    std::this_thread::sleep_for(std::chrono::seconds(50));
+
 }
 catch(std::exception& e) {
     std::cerr << e.what() << std::endl;

@@ -28,7 +28,6 @@ ThreadPool::~ThreadPool()
 {
     stop_flag_ = true;
     queue_.stop();
-
     for (auto& worker : Thr) {
         if (worker.joinable()) {
             worker.join();

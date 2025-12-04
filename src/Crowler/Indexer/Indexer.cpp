@@ -12,23 +12,58 @@ indexer::indexer() {
 }
 
 
-ParsedUrl indexer::FixAndCheckURL(ParsedUrl BasicUrl , ParsedUrl SeparateURL) // берёт ссылку и если она относительная например то поправляет на основе той что вошла в индексер
+ParsedUrl indexer::FixURL(ParsedUrl BasicUrl , ParsedUrl SeparateURL) // берёт ссылку и если она относительная например то поправляет на основе той что вошла в индексер
 {
 
 // BasicUrl это изначальная ссылка. Приминяется например когда у нас относительная ссылка
-    if (SeparateURL.port == "" || SeparateURL.host == "")
+    if (SeparateURL.port.empty() || SeparateURL.host.empty())
     {
         SeparateURL.port = BasicUrl.port;
         SeparateURL.host = BasicUrl.host;
     }
 
+
     return SeparateURL;
 }
 
-bool indexer::CheckExtension(ParsedUrl url)
+bool indexer::CheckUrl(ParsedUrl url)
 {
 
-return false;
+    std::string target = url.target;
+    int last_dot = target.find_last_of('.');
+    int last_slash = target.find_last_of('/');
+
+    if (target.empty() && !url.host.empty() && !url.port.empty()) {
+        return true;
+    }
+
+    if(target[0] == '#') {
+        return false;
+    }
+    std::transform(target.begin(), target.end(), target.begin(), ::tolower);
+
+
+    if(last_dot == std::string::npos ||
+     (last_slash != std::string::npos && last_dot < last_slash)) {
+        return true;
+     }
+
+    if(target.find("mailto:") == 0 ||
+       target.find("javascript:") == 0 ||
+       target.find("tel:") == 0)
+    {
+        return false;
+    }
+
+    std::string extension = target.substr(last_dot);
+
+    for(const auto& ext : SPECIAL_CHAR_STRING::badExtension) {
+        if(extension.find(ext) != std::string::npos) {
+            return false;
+        }
+    }
+
+return true;
 }
 
 ParsedUrl indexer::ParsingURL(std::string url)
@@ -128,7 +163,7 @@ std::string indexer::RefactorText(std::string response)
     for (char c : response)
     {
         IsSpec = false;
-        for (char s : spec_symbols::special_chars)
+        for (char s : SPECIAL_CHAR_STRING::special_chars)
         {
             if (c == s)
             {

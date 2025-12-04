@@ -19,7 +19,11 @@ void Crowler::AddWork(std::string page, ParsedUrl BasicUrl, int deep)
         for (std::string url : urls)
         {
             ParsedUrl parsed_url = indexer_.ParsingURL(url);
-            parsed_url = indexer_.FixAndCheckURL(BasicUrl, parsed_url);
+            parsed_url = indexer_.FixURL(BasicUrl, parsed_url);
+
+            if (!indexer_.CheckUrl(parsed_url)) {
+                continue;
+            }
 
             threadPool.submit(std::bind(&Crowler::Work, this, parsed_url, deep+1));
             std::cout<< "Addwork push okey" << std::endl;

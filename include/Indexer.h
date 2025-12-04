@@ -29,9 +29,9 @@ public:
 
     ParsedUrl ParsingURL(std::string url);
 
-    ParsedUrl FixAndCheckURL(ParsedUrl BasicUrl , ParsedUrl SeparateURL);
+    ParsedUrl FixURL(ParsedUrl BasicUrl , ParsedUrl SeparateURL);
 
-    bool CheckExtension(ParsedUrl url);
+    bool CheckUrl(ParsedUrl url);
 
     std::string DelHead(std::string response);
 

@@ -36,7 +36,7 @@ std::string httpclient::download(std::string host,std::string port, std::string 
         beast::error_code ec;
         asio::io_context ioc;
         asio::ip::tcp::resolver resolver_(ioc);//днс ресольвер
-        //std::lock_guard<std::mutex> lock(mutex);
+
         /* Ошибка «handshake: длина пакета слишком длинная (рутины SSL)» [asio.ssl:167772358] может возникать,
          * когда сервер настроен для обработки HTTP-запросов через порт 443, а не протокола HTTPS*/
 
