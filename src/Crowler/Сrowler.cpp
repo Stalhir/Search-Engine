@@ -15,7 +15,7 @@ void Crowler::AddWork(std::string page, ParsedUrl BasicUrl, int deep)
     if (deep >= maxDeep) {
         return;
     }
-//Исправь Work - добавляй URL в visited СРАЗУ:
+
         for (std::string url : urls)
         {
             ParsedUrl parsed_url = indexer_.ParsingURL(url);

@@ -32,20 +32,11 @@ try
     testurl.host = "www.rfc-editor.org";
     testurl.port = "443";
     testurl.target = "/rfc/rfc2606.html";
-    //ѕроблема: OpenSSL не потокобезопасен по умолчанию!
+    //OpenSSL не потокобезопасен
     TEST.AddInitialUrl(testurl);
 
     TEST.Work(testurl, 1);
-    /*
-        1. DelHead() - опасное удаление по шаблону
-    cpp
-    response.erase(response.find("<head>"), response.find("</head>"));
-        ≈сли <head> или </head> не найдены, find() вернет string::npos
 
-
-        Ёто приводит к переполнению буфера или неопределенному поведению
-    */ //якор€ не принимать
-    //httpclient.download("www.rfc-editor.org", "443", "/rfc/rfc2606.html");
     // ѕ–ќ¬≈–я“№ HTML ли это также когда корнева€ ссылка таргету ставить значение "/"
 
 

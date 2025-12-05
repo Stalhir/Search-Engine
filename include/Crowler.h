@@ -14,8 +14,8 @@ indexer& indexer_;
 ThreadPool& threadPool;
 std::unordered_set<std::string> visited_urls;
 std::mutex visited_mutex;
-// Добавить проверку visited URLs
-int maxDeep; // Work выполняет работу. в нём для ссылок
+
+int maxDeep;
 public: //FOR TEST THIS PRIVATE
 void Work(ParsedUrl url, int deep); // прокидывается в пулл потоков. Скачивает и Индеексирует страницу
 
