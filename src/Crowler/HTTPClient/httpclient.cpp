@@ -24,6 +24,7 @@ std::string httpclient::download_http(std::string host, std::string target)
 
 std::string httpclient::download_https(std::string host, std::string target)
 {
+
 return target;
 }
 

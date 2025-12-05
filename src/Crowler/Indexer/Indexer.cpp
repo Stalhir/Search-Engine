@@ -12,7 +12,7 @@ indexer::indexer() {
 }
 
 
-ParsedUrl indexer::FixURL(ParsedUrl BasicUrl , ParsedUrl SeparateURL) // берёт ссылку и если она относительная например то поправляет на основе той что вошла в индексер
+ParsedUrl indexer::FixURL(ParsedUrl BasicUrl , ParsedUrl SeparateURL)
 {
 
 // BasicUrl это изначальная ссылка. Приминяется например когда у нас относительная ссылка
@@ -22,7 +22,36 @@ ParsedUrl indexer::FixURL(ParsedUrl BasicUrl , ParsedUrl SeparateURL) // бер�
         SeparateURL.host = BasicUrl.host;
     }
 
+    std::string target = SeparateURL.target;
 
+    if (!target.empty()) {
+
+        if (target.size() >= 2 && target[0] == '.' && target[1] == '/') {
+            target = target.substr(2);
+        }
+
+        if (!target.empty() && target[0] != '/' && !BasicUrl.target.empty()) {
+
+            size_t last_slash = BasicUrl.target.find_last_of('/');
+            if (last_slash != std::string::npos) {
+
+                std::string base_dir = BasicUrl.target.substr(0, last_slash + 1);
+                target = base_dir + target;
+            } else {
+                target = "/" + target;
+            }
+        }
+
+        while (target.size() >= 2 && target[0] == '.' && target[1] == '/') {
+            target = target.substr(2);
+        }
+
+        if (!target.empty() && target[0] != '/') {
+            target = "/" + target;
+        }
+    }
+
+    SeparateURL.target = target;
     return SeparateURL;
 }
 
@@ -33,11 +62,11 @@ bool indexer::CheckUrl(ParsedUrl url)
     int last_dot = target.find_last_of('.');
     int last_slash = target.find_last_of('/');
 
-    if (target.empty() && !url.host.empty() && !url.port.empty()) {
+    if (!url.target.empty() && !url.host.empty() && !url.port.empty()) {
         return true;
     }
 
-    if(target[0] == '#') {
+    if(target.find("#") != std::string::npos) {
         return false;
     }
     std::transform(target.begin(), target.end(), target.begin(), ::tolower);
@@ -73,31 +102,45 @@ ParsedUrl parsed_url;
 
 bool ThisOnlyTarget{false};
 
-    if (url.find("http://") != std::string::npos){
+    if (url.find("http://") == 0){
         parsed_url.port = "80";
-        url.erase(url.find("http://"), 7);
+        url.erase(0, 7);
     }
-    else if (url.find("https://") != std::string::npos) {
+    else if (url.find("https://") == 0) {
         parsed_url.port = "443";
-        url.erase(url.find("https://"), 8);
+        url.erase(0, 8);
     }
     else
     {
-        ThisOnlyTarget = true;
+
     }
 
-    if(!ThisOnlyTarget)
-    {
-        parsed_url.host = url.substr(0,url.find("/"));
-        url.erase(0, url.find("/"));
+
+    int slash_pos = url.find('/');
+
+    if (slash_pos != std::string::npos) {
+        if (slash_pos > 0) {
+            parsed_url.host = url.substr(0, slash_pos);
+            parsed_url.target = url.substr(slash_pos);
+        }
+        else
+        {
+            parsed_url.host = "";
+            parsed_url.target = url;
+        }
     }
     else
     {
-        parsed_url.host = "";
-        parsed_url.port = "";
-        parsed_url.target = url;
+        if (url.empty() || url[0] == '#' || url[0] == '?') {
+            parsed_url.host = "";
+            parsed_url.target = url;
+        }
+        else
+        {
+            parsed_url.host = url;
+            parsed_url.target = "/";
+        }
     }
-
 
 return parsed_url;
 }

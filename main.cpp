@@ -24,21 +24,28 @@ try
 
     httpclient httpclient;
     indexer indexer_;
-    ThreadPool pool(1);
+    ThreadPool pool(16);
 
-    Crowler TEST(httpclient, indexer_, pool,10);
+    Crowler TEST(httpclient, indexer_, pool,3);
 
     ParsedUrl testurl;
     testurl.host = "www.rfc-editor.org";
     testurl.port = "443";
     testurl.target = "/rfc/rfc2606.html";
     //OpenSSL не потокобезопасен
-    TEST.AddInitialUrl(testurl);
+    //TEST.AddInitialUrl(testurl);
+
+    //TEST.Work(testurl, 1);
+
+    testurl.host = "www.wikipedia.org";
+    testurl.port = "443";
+    testurl.target = "/";
 
     TEST.Work(testurl, 1);
 
-    // ѕ–ќ¬≈–я“№ HTML ли это также когда корнева€ ссылка таргету ставить значение "/"
 
+
+    std::this_thread::sleep_for(std::chrono::seconds(10));
 
 }
 catch(std::exception& e) {
