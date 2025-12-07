@@ -41,7 +41,7 @@ ini_parser::ini_parser(string fileadress) : file(fileadress)
 {
 	if (!file.is_open())
 	{
-		throw "the file did not open";
+		throw std::exception("the file did not open");
 	}
 	else
 	{
@@ -73,7 +73,7 @@ bool ini_parser::AddVar(string& Str, int IndexSection)
 	{ return false; }
 	else 
 	{
-		DeleteAllSym(Str, Str.begin(), find(Str.begin(), Str.end(), '='), ' ');
+		DeleteAllSym(Str, Str.begin(), Str.end(), ' ');// тут вместо до знака равно сделал чтобы чистилась вся строка от пробелов
 		auto itEqSign = find(Str.begin(), Str.end(), '=');
 
 		if (Str.front() != '=')
@@ -81,8 +81,6 @@ bool ini_parser::AddVar(string& Str, int IndexSection)
 			string valName, valData;
 			valName = string(Str.begin(), itEqSign);
 			valData = string(++itEqSign, Str.end());
-			cout << valName << endl;
-			cout << valData << endl;
 			Sections[IndexSection].var.insert(std::pair<string, string>(valName, valData));
 		}
 		else { return false; }
@@ -125,12 +123,12 @@ string ini_parser::getvalue(string SectionName, string ValueName)
 		[&SectionName](const Section& sect) { return sect.name == SectionName; });
 
 	if (sectionit == Sections.end()) {
-		throw "No section with that name was found";
+		throw std::exception("No section with that name was found");
 	}
 
 	auto varit = sectionit->var.find(ValueName);
 	if (varit == sectionit->var.end()) {
-		throw "No vareable with that name was found";
+		throw std::exception("No vareable with that name was found");
 	}
 	const string& result = varit->second;
 	

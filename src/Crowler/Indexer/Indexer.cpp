@@ -7,7 +7,7 @@
 #include "pugixml.hpp"
 #include "SYMBOLS.h"
 
-indexer::indexer() {
+indexer::indexer(DataBase&& database) : database(std::move(database)) {
 
 }
 
@@ -103,11 +103,11 @@ ParsedUrl parsed_url;
 bool ThisOnlyTarget{false};
 
     if (url.find("http://") == 0){
-        parsed_url.port = "80";
+        parsed_url.port = "http://";
         url.erase(0, 7);
     }
     else if (url.find("https://") == 0) {
-        parsed_url.port = "443";
+        parsed_url.port = "https://";// вместо чисел сделал так
         url.erase(0, 8);
     }
     else
@@ -231,39 +231,45 @@ return result;
 std::unordered_map<std::string, int> indexer::SeparateWords(std::string response)
 {
     std::unordered_map<std::string, int> words;
-
+    std::stringstream ss(response);
     std::string word;
 
-    // создаём строку А. цикл проходящий по всей строке респонс. Далее игнорируем каждый пробел и не записываем их. Видим что то кроме пробела смотрим растояния до следующего.
-    // если оно соответствует тз проверяем нету ли этой строки в массиве и либо добовляем либо увеличиваем счётчик в уже существующем элементе. Если не соответствует скипаем. А также чистим строку
 
-    int step = 0;
-    int skipCount = 0;
+    const size_t MIN_LENGTH = 3;
+    const size_t MAX_LENGTH = 32;
 
-    for (char c : response)
+    while (ss >> word)
     {
-       if (c != ' ' && skipCount <= 0)
-       {
-           auto it = std::find(response.begin()+step, response.end(), ' ');
-           int distance = std::distance(response.begin()+step, it);
-           if (distance < 32 && distance > 3)
-           {
-               word = std::string(response.begin()+step, it);//скип слов дописать надо
-               words[word]++;
-           }
-           skipCount = distance;
-       }
+        size_t len = word.length();
 
-    skipCount--;
-    step++;
+
+        if (len > MIN_LENGTH && len < MAX_LENGTH)
+        {
+            words[word]++;
+        }
+
     }
 
     return words;
 }
 
-void indexer::AddToDB(std::unordered_map<std::string, int> words)
+void indexer::AddToDB(std::unordered_map<std::string, int> words, ParsedUrl url)
 {
-std::cout << words.size() << std::endl;
+// добавляем слова и ссылки сразу. селектем находим id страницы и
+    std::cout<< "Add BD start" << std::endl;
+    std::lock_guard<std::mutex> lock(mutDB);
+    std::string full_url = url.host + url.target;
+    database.InsertPage(full_url);
+    std::cout<< "InsertPage okey" << std::endl;
+    auto pageid = database.SearchPage(full_url);
+    std::cout<< "SearchPage okey" << std::endl;
+    for (auto word : words) {
+        database.InsertWord(word.first);
+        auto wordid = database.SearchWord(word.first);
+
+        database.InsertPageWord(pageid, wordid, std::to_string(word.second));
+    }
+    std::cout<< "Add BD okey";
 }
 
 
@@ -278,6 +284,6 @@ void indexer::Index(std::string response, ParsedUrl url)
     std::cout<< "DelHTML okey" << std::endl;
     result = RefactorText(result);
     std::cout<< "RefactorText okey" << std::endl;
-    AddToDB(SeparateWords(result));
+    AddToDB(SeparateWords(result),url);//Проблема тут вообщем слишком много комитов. нужно чтоб addtobd было в одном коммите с одним обьектом tx
     std::cout<< "Index okey" << std::endl;
 }

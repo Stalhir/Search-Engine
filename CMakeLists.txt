@@ -2,13 +2,20 @@ cmake_minimum_required(VERSION 3.20)
 project(Search_Engine)
 set(PostgreSQL_ADDITIONAL_VERSIONS "17")
 
+set(PostgreSQL_ROOT "C:/Program Files/PostgreSQL/17")
+find_package(PostgreSQL REQUIRED)
 
+message(STATUS "PostgreSQL include dirs: ${PostgreSQL_INCLUDE_DIRS}")
+message(STATUS "PostgreSQL library dirs: ${PostgreSQL_LIBRARY_DIRS}")
+message(STATUS "PostgreSQL libraries: ${PostgreSQL_LIBRARIES}")
 
 set(BOOST_ROOT "C:/Users/askoy/Desktop/search engine/lib/boost")
 set(BOOST_INCLUDEDIR "${BOOST_ROOT}/include")
 set(BOOST_LIBRARYDIR "${BOOST_ROOT}/stage/lib")
 
 find_package(Boost REQUIRED)
+
+
 
 link_directories(${BOOST_LIBRARYDIR})
 include_directories(${BOOST_ROOT})
@@ -54,6 +61,7 @@ target_include_directories(Search_Engine PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/src
         #${CMAKE_CURRENT_SOURCE_DIR}/lib/pugixml/src
         ${OPENSSL_INCLUDE_DIR}
+        ${PostgreSQL_INCLUDE_DIRS}
 )
 
 
@@ -64,6 +72,7 @@ target_compile_features(Search_Engine PRIVATE cxx_std_17)
 target_link_libraries(Search_Engine PRIVATE pqxx)
 target_link_libraries(Search_Engine PRIVATE pugixml)
 target_link_libraries(Search_Engine PRIVATE ${OPENSSL_LIBRARIES})
-        if(WIN32)
+target_link_libraries(Search_Engine PRIVATE  ${PostgreSQL_LIBRARIES})
+if(WIN32)
     target_link_libraries(Search_Engine PRIVATE ws2_32 wsock32)
 endif()

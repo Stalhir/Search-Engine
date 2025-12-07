@@ -1,9 +1,13 @@
 #include "initializer.h"
-#include <pqxx/pqxx>
+
+#include <iostream>
+#include <iostream>
 
 
 
-InitSearchEngine::InitSearchEngine()
+
+
+InitSearchEngine::InitSearchEngine(std::string path) : parser(path)
 {
 GetSettings();
 }
@@ -37,11 +41,11 @@ return SearchEngine();
 DataBase InitSearchEngine::SetForDB() {
     std::string init = "host=" + settings[0] + " "
     "port=" + settings[1] + " "
-    "name=" + settings[2] + " "
-    "login=" + settings[3] + " "
+    "dbname=" + settings[2] + " "
+    "user=" + settings[3] + " "
     "password=" + settings[4] + " ";
 
     pqxx::connection c(init);
 
-return DataBase(c);
+return DataBase(std::move(c));
 }

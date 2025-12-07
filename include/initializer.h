@@ -8,10 +8,10 @@
 
 class InitSearchEngine
 {
-private:
+public:
     std::vector<std::string> settings;
 
-    ini_parser parser{"setting.ini"};
+    ini_parser parser;
 
     void GetSettings();
 
@@ -22,5 +22,5 @@ private:
     Crowler&& SetForCrowler();
 public:
 
-    InitSearchEngine();
+    InitSearchEngine(std::string path);
 };
