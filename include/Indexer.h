@@ -49,6 +49,6 @@ public:
 
     std::unordered_map<std::string, int> SeparateWords(std::string response);
 
-    void AddToDB(std::unordered_map<std::string, int> words, ParsedUrl url);
+    void AddToDB(const std::unordered_map<std::string, int> &words, ParsedUrl url);
 };
 

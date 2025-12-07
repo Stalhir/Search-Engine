@@ -214,7 +214,9 @@ std::string indexer::RefactorText(std::string response)
                 break;
             }
         }
-        if (!IsSpec)
+
+
+        if (!IsSpec && std::isprint(static_cast<unsigned char>(c)))
         {
         result += c;
         }
@@ -253,23 +255,25 @@ std::unordered_map<std::string, int> indexer::SeparateWords(std::string response
     return words;
 }
 
-void indexer::AddToDB(std::unordered_map<std::string, int> words, ParsedUrl url)
+void indexer::AddToDB(const std::unordered_map<std::string, int>& words, ParsedUrl url)
 {
-// добавляем слова и ссылки сразу. селектем находим id страницы и
     std::cout<< "Add BD start" << std::endl;
     std::lock_guard<std::mutex> lock(mutDB);
-    std::string full_url = url.host + url.target;
-    database.InsertPage(full_url);
-    std::cout<< "InsertPage okey" << std::endl;
-    auto pageid = database.SearchPage(full_url);
-    std::cout<< "SearchPage okey" << std::endl;
-    for (auto word : words) {
-        database.InsertWord(word.first);
-        auto wordid = database.SearchWord(word.first);
+    pqxx::work tx(database.connection_);
 
-        database.InsertPageWord(pageid, wordid, std::to_string(word.second));
+
+    std::string full_url = url.host + url.target;
+    std::string pageid = database.InsertPage(full_url,tx);
+    std::cout<< "InsertPage okey" << std::endl;
+    for (auto word : words) {
+    std::cout<<"WORD: " << word.first << std::endl; // WORD: ░╬k∙╒hоу▲К░hїlд√╢q►vШn
+        std::string wordid = database.InsertWord(word.first,tx);
+        std::cout<< "InsertWord okey" << std::endl;
+
+        database.InsertPageWord(pageid, wordid, std::to_string(word.second),tx);
     }
     std::cout<< "Add BD okey";
+    tx.commit();
 }
 
 
@@ -278,12 +282,13 @@ void indexer::Index(std::string response, ParsedUrl url)
     //std::vector<std::string> hrefs = GetHrefs(response);
 
 
-    std::string result = DelHead(response); // file без head - прога умирает
+    std::string result = DelHead(response);
     std::cout<< "DelHead okey" << std::endl;
     result = DelHTML(result);
     std::cout<< "DelHTML okey" << std::endl;
     result = RefactorText(result);
     std::cout<< "RefactorText okey" << std::endl;
-    AddToDB(SeparateWords(result),url);//Проблема тут вообщем слишком много комитов. нужно чтоб addtobd было в одном коммите с одним обьектом tx
+    //SeparateWords(result);
+    AddToDB(SeparateWords(result),url);
     std::cout<< "Index okey" << std::endl;
 }

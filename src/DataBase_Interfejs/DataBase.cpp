@@ -14,41 +14,45 @@ void DataBase::InitDB() {
     tx.commit();
 }
 
-void DataBase::InsertPage(std::string url) {
-    pqxx::work tx(connection_);
+std::string DataBase::InsertPage(std::string url, pqxx::work& tx) {
     std::string safe_url = tx.quote(url);
 
     std::string query = "INSERT INTO Pages(url) VALUES (" + safe_url + ") "
-                             "ON CONFLICT (url) DO NOTHING "
-                             "RETURNING id;";
-    tx.exec(query);
+                        "ON CONFLICT (url)DO UPDATE SET url = EXCLUDED.url "
+                        "RETURNING id;";
+    pqxx::result res = tx.exec(query);
 
-    tx.commit();
+    if (res.empty())
+    {
+        throw std::runtime_error("InsertPage failed to return ID.");
+    }
+    return res[0][0].as<std::string>();
+
 }
 
-void DataBase::InsertWord(std::string word) {
-    pqxx::work tx(connection_);
+std::string DataBase::InsertWord(std::string word, pqxx::work& tx) {
     std::string safe_word = tx.quote(word);
 
     std::string query = "INSERT INTO Words(word) VALUES (" + safe_word + ") "
-                             "ON CONFLICT (word) DO NOTHING "
+                             "ON CONFLICT (word) DO UPDATE SET word = EXCLUDED.word "
                              "RETURNING id;";
 
-    tx.exec(query);
+    pqxx::result res = tx.exec(query);
 
-    tx.commit();
+    if (res.empty()) {
+        throw std::runtime_error("InsertWord failed to return ID.");
+    }
+    return res[0][0].as<std::string>();
+
 }
 
-void DataBase::InsertPageWord(std::string pageId, std::string wordId, std::string count) {
-    pqxx::work tx(connection_);
-
+void DataBase::InsertPageWord(std::string pageId, std::string wordId, std::string count, pqxx::work& tx) {
     std::string query = "INSERT INTO Page_Word(page_id, word_id, count) "
                         "VALUES(" + pageId + ", " + wordId + ", " + count + ") "
                         "ON CONFLICT (page_id, word_id) DO UPDATE "
                         "SET count = " + count + ";";
     tx.exec(query);
 
-    tx.commit();
 };
 
 std::string DataBase::SearchWord(std::string word) {

@@ -10,10 +10,10 @@
 
 class DataBase
 {
-private:
+public:
     pqxx::connection connection_;
 
-public:
+
     DataBase(pqxx::connection&& connection) noexcept;
 
     DataBase() = delete;
@@ -27,10 +27,10 @@ public:
 
     void InitDB();
 
-    void InsertWord(std::string word);
-    void InsertPage(std::string url);
+    std::string InsertWord(std::string word, pqxx::work& tx);
+    std::string InsertPage(std::string url, pqxx::work& tx);
 
-    void InsertPageWord(std::string pageId, std::string wordId, std::string count);
+    void InsertPageWord(std::string pageId, std::string wordId, std::string count, pqxx::work& tx);
 
     std::string SearchWord(std::string word);
     std::string SearchPage(std::string url);
