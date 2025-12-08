@@ -25,8 +25,14 @@ void Crowler::AddWork(std::string page, ParsedUrl BasicUrl, int deep)
                 continue;
             }
 
+            std::string key = MakeUrlKey(parsed_url);
+            if (!TryAddUrl(key)) {
+                std::cout << "Already visited: " << parsed_url.host << parsed_url.target << std::endl;
+                continue;
+            }
+
             threadPool.submit(std::bind(&Crowler::Work, this, parsed_url, deep+1));
-            std::cout<< "Addwork push okey" << std::endl;
+            std::cout<< "URL push: " <<parsed_url.port + parsed_url.host + parsed_url.target << std::endl;
         }
         std::cout<< "Addwork okey" << std::endl;
 }
@@ -36,11 +42,8 @@ void Crowler::Work(ParsedUrl url, int deep)
 {
 
     std::string key = MakeUrlKey(url);
-    if (!TryAddUrl(key) && deep != 1) {
-        std::cout << "Already visited: " << url.host << url.target << std::endl;
-        return;
-    }
-    else if (deep == 1)
+
+    if (deep == 1)
     {
     AddInitialUrl(url);
     }
@@ -52,13 +55,10 @@ void Crowler::Work(ParsedUrl url, int deep)
         std::cout << "Max deep reached: " << deep << std::endl;
         return;
     }
-std::cout<< "download start" << deep << std::endl;
     std::string responce = connects.download(url.host, url.port, url.target);
-    std::cout<< "download work?" << deep << std::endl;
+
     if (!responce.empty()) {
-        std::cout << "URL: " << url.target << std::endl;
         indexer_.Index(responce, url);
-std::cout<< "Index Yes?" << deep << std::endl;
 
         if (deep < maxDeep) {
             AddWork(responce, url, deep);

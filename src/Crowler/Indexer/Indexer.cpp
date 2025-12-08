@@ -15,7 +15,6 @@ indexer::indexer(DataBase&& database) : database(std::move(database)) {
 ParsedUrl indexer::FixURL(ParsedUrl BasicUrl , ParsedUrl SeparateURL)
 {
 
-// BasicUrl это изначальная ссылка. Приминяется например когда у нас относительная ссылка
     if (SeparateURL.port.empty() || SeparateURL.host.empty())
     {
         SeparateURL.port = BasicUrl.port;
@@ -24,31 +23,62 @@ ParsedUrl indexer::FixURL(ParsedUrl BasicUrl , ParsedUrl SeparateURL)
 
     std::string target = SeparateURL.target;
 
-    if (!target.empty()) {
+    if (target.empty()) {
+        SeparateURL.target = BasicUrl.target;
+        return SeparateURL;
+    }
 
-        if (target.size() >= 2 && target[0] == '.' && target[1] == '/') {
-            target = target.substr(2);
-        }
+    if (target[0] == '/') {
+        SeparateURL.target = target;
+        return SeparateURL;
+    }
 
-        if (!target.empty() && target[0] != '/' && !BasicUrl.target.empty()) {
 
-            size_t last_slash = BasicUrl.target.find_last_of('/');
-            if (last_slash != std::string::npos) {
+    std::string base_path = BasicUrl.target;
+    size_t last_slash = base_path.find_last_of('/');
 
-                std::string base_dir = BasicUrl.target.substr(0, last_slash + 1);
-                target = base_dir + target;
-            } else {
-                target = "/" + target;
+    if (last_slash != std::string::npos) {
+        base_path = base_path.substr(0, last_slash + 1); // Включаем завершающий слэш
+    } else {
+        base_path = "/";
+    }
+
+    std::string current_path = base_path + target;
+
+
+    std::vector<std::string> segments;
+    std::stringstream ss(current_path);
+    std::string segment;
+
+
+    while (std::getline(ss, segment, '/')) {
+        if (segment.empty() || segment == ".") {
+            continue;
+        } else if (segment == "..") {
+
+            if (!segments.empty()) {
+                segments.pop_back();
             }
+        } else {
+            segments.push_back(segment); // Обычный сегмент
         }
+    }
 
-        while (target.size() >= 2 && target[0] == '.' && target[1] == '/') {
-            target = target.substr(2);
-        }
 
-        if (!target.empty() && target[0] != '/') {
-            target = "/" + target;
-        }
+    bool ends_with_slash = (!SeparateURL.target.empty() && SeparateURL.target.back() == '/');
+
+    target = "";
+    for (const auto& s : segments) {
+        target += "/";
+        target += s;
+    }
+
+    if (segments.empty()) {
+        target = "/";
+    }
+
+    else if (ends_with_slash) {
+        target += "/";
     }
 
     SeparateURL.target = target;
@@ -103,18 +133,26 @@ ParsedUrl parsed_url;
 bool ThisOnlyTarget{false};
 
     if (url.find("http://") == 0){
-        parsed_url.port = "http://";
+        parsed_url.port = "80";
         url.erase(0, 7);
     }
     else if (url.find("https://") == 0) {
-        parsed_url.port = "https://";// вместо чисел сделал так
+        parsed_url.port = "443";// вместо чисел сделал так
         url.erase(0, 8);
+    }
+    else if (url[0] == '/' && url[1] == '/') {
+        url.erase(0, 2);
     }
     else
     {
 
     }
 
+    size_t hash_pos = url.find('#');
+
+    if (hash_pos != std::string::npos) {
+        url.erase(hash_pos);
+    }
 
     int slash_pos = url.find('/');
 
@@ -152,16 +190,13 @@ std::string indexer::DelHead(std::string response)
 if(response.find("<head>") != std::string::npos
    && response.find("</head>") != std::string::npos)
 {
-response.erase(response.find("<head>"), response.find("</head>"));
+response.erase(response.find("<head>"), response.find("</head>")+7);
 }
 
 return response;
 }
 
-std::vector<std::string> indexer::GetHrefs(std::string response)// бывает короче так.. Что нам нужно заходить в глубь тоесть без адреса и тд.
-//Нужно короче просто сохранять гдет адрес и текущий таргет сайта где хрaнить
-// ЗАМЕНИ HTML ENTITIES перед парсингом
-// УБЕРИ НЕВАЛИДНЫЕ СИМВОЛЫ . Хотя от пк много ресурсов будет жрать. лучше сразу находить ссылки и в поток их
+std::vector<std::string> indexer::GetHrefs(std::string response)
 {
     std::vector<std::string> test;
 
@@ -173,7 +208,7 @@ std::vector<std::string> indexer::GetHrefs(std::string response)// бывает 
     for (auto     attr : hrefs) {
         std::string url = attr.attribute().value();
 
-        std::cout << "URL: " << url << std::endl;
+        //std::cout << "URL: " << url << std::endl;
 
         test.push_back(url);
     }
@@ -257,22 +292,20 @@ std::unordered_map<std::string, int> indexer::SeparateWords(std::string response
 
 void indexer::AddToDB(const std::unordered_map<std::string, int>& words, ParsedUrl url)
 {
-    std::cout<< "Add BD start" << std::endl;
+
     std::lock_guard<std::mutex> lock(mutDB);
     pqxx::work tx(database.connection_);
 
 
     std::string full_url = url.host + url.target;
     std::string pageid = database.InsertPage(full_url,tx);
-    std::cout<< "InsertPage okey" << std::endl;
     for (auto word : words) {
-    std::cout<<"WORD: " << word.first << std::endl; // WORD: ░╬k∙╒hоу▲К░hїlд√╢q►vШn
+   // WORD: ░╬k∙╒hоу▲К░hїlд√╢q►vШn
         std::string wordid = database.InsertWord(word.first,tx);
-        std::cout<< "InsertWord okey" << std::endl;
+
 
         database.InsertPageWord(pageid, wordid, std::to_string(word.second),tx);
     }
-    std::cout<< "Add BD okey";
     tx.commit();
 }
 
@@ -282,13 +315,12 @@ void indexer::Index(std::string response, ParsedUrl url)
     //std::vector<std::string> hrefs = GetHrefs(response);
 
 
-    std::string result = DelHead(response);
-    std::cout<< "DelHead okey" << std::endl;
-    result = DelHTML(result);
-    std::cout<< "DelHTML okey" << std::endl;
-    result = RefactorText(result);
-    std::cout<< "RefactorText okey" << std::endl;
-    //SeparateWords(result);
-    AddToDB(SeparateWords(result),url);
-    std::cout<< "Index okey" << std::endl;
+    //std::string result = DelHead(response);
+
+    response = DelHTML(response);
+
+    response = RefactorText(response);
+
+    AddToDB(SeparateWords(response),url);
+
 }
