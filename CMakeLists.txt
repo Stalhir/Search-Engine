@@ -54,6 +54,8 @@ add_executable(Search_Engine main.cpp src/Initializer/INI_parser/INI_parser.cpp
         src/Search_Engine/SearchEngine.cpp
         src/DataBase_Interfejs/DataBase.cpp
         include/SYMBOLS.h
+        src/Search_Engine/HTTPServer/httpserver.cpp
+        include/httpserver.h
 )
 
 target_include_directories(Search_Engine PRIVATE
