@@ -5,6 +5,7 @@
 #include "include/httpclient.h"
 #include "Indexer.h"
 #include "initializer.h"
+#include "httpserver.h"
 #include  <thread>
 
 int main()
@@ -21,7 +22,7 @@ try
     }
     std::cout << "OpenSSL DLL loaded successfully!" << std::endl;
 */
-
+/*
     std::cout<< "Main Thread id: "<< std::this_thread::get_id() << std::endl;
 
     InitSearchEngine init("C:\\Users\\askoy\\Desktop\\search engine\\setting.ini");
@@ -55,7 +56,17 @@ try
     testurl.target = "/";
 
     //TEST.Work(testurl, 1);
+*/
 
+    auto port = static_cast<unsigned short>(10322);
+    std::string cert_file = "C:\\Users\\askoy\\Desktop\\search engine\\opensslsertificate\\server.crt";
+    std::string key_file = "C:\\Users\\askoy\\Desktop\\search engine\\opensslsertificate\\server.key";
+
+    net::io_context ioc;
+    http_server server(ioc, port, cert_file, key_file);
+
+    std::cout << "HTTPS сервер запущен на порту " << port << std::endl;
+    ioc.run();
 
 
     std::this_thread::sleep_for(std::chrono::seconds(20));
