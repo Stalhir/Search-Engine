@@ -293,7 +293,7 @@ std::unordered_map<std::string, int> indexer::SeparateWords(std::string response
 void indexer::AddToDB(const std::unordered_map<std::string, int>& words, ParsedUrl url)
 {
 
-    //std::lock_guard<std::mutex> lock(mutDB);
+    std::lock_guard<std::mutex> lock(database.connection_mutex_);
     pqxx::work tx(database.connection_);
 
     std::string protocol;

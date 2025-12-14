@@ -26,7 +26,6 @@ try
     std::cout<< "Main Thread id: "<< std::this_thread::get_id() << std::endl;
 
     InitSearchEngine init("C:\\Users\\askoy\\Desktop\\search engine\\setting.ini");
-
     //init.SetForDB();
     //Проблема 100 процентов в pqxx
     httpclient httpclient;
@@ -34,7 +33,7 @@ try
 
     indexer_.database.InitDB();
 
-    ThreadPool pool(16);
+    ThreadPool pool(16);//1 поток окей - больше ошибка
 
     Crowler TEST(httpclient, indexer_, pool,3);
 
@@ -57,7 +56,6 @@ try
 
     //TEST.Work(testurl, 1);
 
-    DataBase  test(init.SetForDB());
     std::shared_ptr<DataBase> db_ptr =
         std::make_shared<DataBase>(init.SetForDB());
 
@@ -72,7 +70,7 @@ try
     ioc.run();
 
 
-    std::this_thread::sleep_for(std::chrono::seconds(20));
+    //std::this_thread::sleep_for(std::chrono::seconds(60));
 
 }
 catch(std::exception& e) {

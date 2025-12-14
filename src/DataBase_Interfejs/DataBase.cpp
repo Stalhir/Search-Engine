@@ -16,7 +16,6 @@ void DataBase::InitDB() {
 
 std::string DataBase::InsertPage(std::string url, pqxx::work& tx) {
     std::string safe_url = tx.quote(url);
-
     std::string query = "INSERT INTO Pages(url) VALUES (" + safe_url + ") "
                         "ON CONFLICT (url)DO UPDATE SET url = EXCLUDED.url "
                         "RETURNING id;";
