@@ -330,6 +330,6 @@ void indexer::Index(std::string response, ParsedUrl url)
 
     response = RefactorText(response);
 
-    AddToDB(SeparateWords(response),url);
+    AddToDB(SeparateWords(response),url); //not problem
 
 }

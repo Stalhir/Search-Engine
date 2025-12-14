@@ -9,26 +9,16 @@
 #include  <thread>
 
 int main()
-{ //Добавить обработку ошибок http download переписать под async boost beast скорее всего ошибка так исчезнет
+{
 try
 {
-    //HMODULE ssl = LoadLibraryA("libssl-3-x64.dll");
-    //HMODULE crypto = LoadLibraryA("libcrypto-3-x64.dll");
-
-    /*
-    if(!ssl || !crypto) {
-        std::cout << "OpenSSL DLL not found!" << std::endl;
-        return 1;
-    }
-    std::cout << "OpenSSL DLL loaded successfully!" << std::endl;
-*/
+    
 
     std::cout<< "Main Thread id: "<< std::this_thread::get_id() << std::endl;
 
-    InitSearchEngine init("C:\\Users\\askoy\\Desktop\\search engine\\setting.ini");
-    //init.SetForDB();
-    //Проблема 100 процентов в pqxx
-    httpclient httpclient;
+    InitSearchEngine init("C:\\Users\\askoy\\Desktop\\SearchEngine\\Search-Engine\\setting.ini");
+
+      httpclient httpclient;
     indexer indexer_(init.SetForDB());
 
     indexer_.database.InitDB();
@@ -37,18 +27,15 @@ try
 
     Crowler TEST(httpclient, indexer_, pool,6);
 
-
+    // если программа падает раньше(тоесть мейн отрубается) обьекты уничтожается и происходит ошибка
 
     ParsedUrl testurl;
     testurl.host = "www.rfc-editor.org";
     testurl.port = "443";
     testurl.target = "/rfc/rfc2606.html";
 
-    //httpclient.download(testurl.host, testurl.port, testurl.target);
-    //OpenSSL не потокобезопасен
-    //TEST.AddInitialUrl(testurl);
-
     TEST.Work(testurl, 1);
+    TEST.WaitUntilDone();
 
     testurl.host = "www.wikipedia.org";
     testurl.port = "443";
@@ -60,17 +47,17 @@ try
         std::make_shared<DataBase>(init.SetForDB());
 
     auto port = static_cast<unsigned short>(10322);
-    std::string cert_file = "C:\\Users\\askoy\\Desktop\\search engine\\opensslsertificate\\server.crt";
-    std::string key_file = "C:\\Users\\askoy\\Desktop\\search engine\\opensslsertificate\\server.key";
+    std::string cert_file = R"(C:\Users\askoy\Desktop\SearchEngine\Search-Engine\opensslsertificate\server.crt)";
+    std::string key_file = R"(C:\Users\askoy\Desktop\SearchEngine\Search-Engine\opensslsertificate\server.key)";
 
     net::io_context ioc;
-    http_server server(ioc, port, cert_file, key_file, db_ptr);
+    //http_server server(ioc, port, cert_file, key_file, db_ptr);
 
     std::cout << "HTTPS server work on port: " << port << std::endl;
     ioc.run();
 
 
-    //std::this_thread::sleep_for(std::chrono::seconds(60));
+    //std::this_thread::sleep_for(std::chrono::seconds(20));
 
 }
 catch(std::exception& e) {

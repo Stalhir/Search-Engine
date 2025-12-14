@@ -30,6 +30,7 @@ void httpclient::InitializeOpenSSL() {
 std::string httpclient::download_http(http::request<http::string_body> req,
     http::response<http::string_body> resp, beast::flat_buffer buffer,asio::ip::basic_resolver_results<asio::ip::tcp> resolver)
 {
+    asio::io_context ioc;
     beast::tcp_stream stream(ioc);
 
     stream.expires_after(std::chrono::seconds(30));
@@ -47,6 +48,7 @@ std::string httpclient::download_http(http::request<http::string_body> req,
 std::string httpclient::download_https( http::request<http::string_body> req,
     http::response<http::string_body> resp, beast::flat_buffer buffer,asio::ip::basic_resolver_results<asio::ip::tcp> resolver, std::string host )
 {
+    asio::io_context ioc;
     asio::ssl::stream<beast::tcp_stream> stream(ioc,ctx);
 
     beast::get_lowest_layer(stream).expires_after(std::chrono::seconds(30));
@@ -74,6 +76,7 @@ std::string httpclient::download(std::string host,std::string port, std::string 
     //ДОбавить чтоб при HTTP он не делал шифрование
     try {
         beast::error_code ec;
+        asio::io_context ioc;
         asio::ip::tcp::resolver resolver_(ioc);//днс ресольвер
 
         beast::flat_buffer buffer;

@@ -10,8 +10,11 @@ Crowler::Crowler(httpclient& client, indexer& idx, ThreadPool& pool, int maxDeep
 
 void Crowler::AddWork(std::string page, ParsedUrl BasicUrl, int deep)
 {
-    std::vector<std::string> urls = indexer_.GetHrefs(page);
-
+    std::vector<std::string> urls;
+    {
+        std::lock_guard<std::mutex> lock(indexer_mutex);
+        urls = indexer_.GetHrefs(page);
+    }
     if (deep >= maxDeep) {
         return;
     }
@@ -30,6 +33,8 @@ void Crowler::AddWork(std::string page, ParsedUrl BasicUrl, int deep)
                 std::cout << "Already visited: " << parsed_url.host << parsed_url.target << std::endl;
                 continue;
             }
+
+            tasks_count++;
 
             threadPool.submit(std::bind(&Crowler::Work, this, parsed_url, deep+1));
             std::cout<< "URL push: " <<parsed_url.port + parsed_url.host + parsed_url.target << std::endl;
@@ -64,6 +69,7 @@ void Crowler::Work(ParsedUrl url, int deep)
             AddWork(responce, url, deep);
         }
     }
+    tasks_count--;
 }
 
 std::string Crowler::MakeUrlKey(ParsedUrl url)
@@ -88,4 +94,16 @@ bool  Crowler::TryAddUrl(std::string url_key)
 void Crowler::AddInitialUrl(const ParsedUrl& url) {
     std::string key = MakeUrlKey(url);
     TryAddUrl(key);
+}
+
+void Crowler::WaitUntilDone() {
+    std::cout << "Waiting for crawler to finish..." << std::endl;
+
+    // ∆дем, пока счетчик активных задач не обнулитс€
+    while (tasks_count > 0) {
+        // —пим 100 миллисекунд, чтобы не нагружать процессор
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    }
+
+    std::cout << "Crawler finished work!" << std::endl;
 }

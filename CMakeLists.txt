@@ -1,80 +1,91 @@
-cmake_minimum_required(VERSION 3.20)
-project(Search_Engine)
-set(PostgreSQL_ADDITIONAL_VERSIONS "17")
+cmake_minimum_required(VERSION 3.18) 
+project(Search_Engine LANGUAGES CXX)
 
-set(PostgreSQL_ROOT "C:/Program Files/PostgreSQL/17")
-find_package(PostgreSQL REQUIRED)
+# Установка стандарта C++
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-message(STATUS "PostgreSQL include dirs: ${PostgreSQL_INCLUDE_DIRS}")
-message(STATUS "PostgreSQL library dirs: ${PostgreSQL_LIBRARY_DIRS}")
-message(STATUS "PostgreSQL libraries: ${PostgreSQL_LIBRARIES}")
+# ====================================================================
+# 1. СИСТЕМНЫЕ ЗАВИСИМОСТИ (Boost, OpenSSL, libpqxx)
+# ====================================================================
 
-set(BOOST_ROOT "C:/Users/askoy/Desktop/search engine/lib/boost")
-set(BOOST_INCLUDEDIR "${BOOST_ROOT}/include")
-set(BOOST_LIBRARYDIR "${BOOST_ROOT}/stage/lib")
-
+# Boost
 find_package(Boost REQUIRED)
-
-
-
-link_directories(${BOOST_LIBRARYDIR})
-include_directories(${BOOST_ROOT})
-
-
 message(STATUS "Boost version: ${Boost_VERSION}")
 message(STATUS "Boost include dir: ${Boost_INCLUDE_DIRS}")
 message(STATUS "Boost libraries: ${Boost_LIBRARIES}")
+
+# OpenSSL
+find_package(OpenSSL REQUIRED)
+
+# libpqxx 
+find_package(libpqxx CONFIG REQUIRED) 
+
+# ====================================================================
+# 2. ВНУТРЕННИЕ/СТОРОННИЕ ЗАВИСИМОСТИ (pugixml через FetchContent)
+# ====================================================================
+include(FetchContent)
+
+# pugixml
+FetchContent_Declare(
+    pugixml_external
+    GIT_REPOSITORY https://github.com/zeux/pugixml.git
+    GIT_TAG v1.14
+)
+FetchContent_MakeAvailable(pugixml_external)
+
+# ====================================================================
+# 3. КОМПИЛЯЦИЯ ИСПОЛНЯЕМОГО ФАЙЛА 
+# ====================================================================
 
 if(WIN32)
     add_compile_definitions(NOMINMAX WIN32_LEAN_AND_MEAN)
 endif()
 
-set(OPENSSL_ROOT_DIR "C:/Program Files/OpenSSL-Win64")
-set(OPENSSL_INCLUDE_DIR "${OPENSSL_ROOT_DIR}/include")
-set(OPENSSL_LIBRARIES
-        "${OPENSSL_ROOT_DIR}/lib/VC/x64/MD/libssl.lib"
-        "${OPENSSL_ROOT_DIR}/lib/VC/x64/MD/libcrypto.lib"
-)
-
-
-add_subdirectory(lib/libpqxx libpqxx-build)
-
-add_library(pugixml lib/pugixml/src/pugixml.cpp)
-target_include_directories(pugixml PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/lib/pugixml/src)
-
-add_executable(Search_Engine main.cpp src/Initializer/INI_parser/INI_parser.cpp
-        src/Crowler/HTTPClient/httpclient.cpp
-        include/SafeQueue.h
-        src/Crowler/ThreadPool/threadpool.cpp
-        src/DataBase_Interfejs/DataBase.cpp
-        src/Initializer/initializer.cpp
-        src/Crowler/Сrowler.cpp
-        src/Crowler/Indexer/Indexer.cpp
-        #lib/pugixml/src/pugixml.cpp
-        src/Search_Engine/SearchEngine.cpp
-        src/DataBase_Interfejs/DataBase.cpp
-        include/SYMBOLS.h
-        src/Search_Engine/HTTPServer/httpserver.cpp
-        include/httpserver.h
+add_executable(Search_Engine
+    main.cpp
+    src/Initializer/INI_parser/INI_parser.cpp
+    src/Crowler/HTTPClient/httpclient.cpp
+    include/SafeQueue.h
+    src/Crowler/ThreadPool/threadpool.cpp
+    src/DataBase_Interfejs/DataBase.cpp
+    src/Initializer/initializer.cpp
+    src/Crowler/Сrowler.cpp
+    src/Crowler/Indexer/Indexer.cpp
+    src/Search_Engine/SearchEngine.cpp
+    src/DataBase_Interfejs/DataBase.cpp
+    include/SYMBOLS.h
+    src/Search_Engine/HTTPServer/httpserver.cpp
+    include/httpserver.h
 )
 
 target_include_directories(Search_Engine PRIVATE
-        ${CMAKE_CURRENT_SOURCE_DIR}/include
-        ${CMAKE_CURRENT_SOURCE_DIR}/src
-        #${CMAKE_CURRENT_SOURCE_DIR}/lib/pugixml/src
-        ${OPENSSL_INCLUDE_DIR}
-        ${PostgreSQL_INCLUDE_DIRS}
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
 
-
-target_link_libraries(Search_Engine PRIVATE Boost::headers)
-#target_link_libraries(Search_Engine PRIVATE Boost::locale)
-#target_link_libraries(Search_Engine PRIVATE Boost::system  )
 target_compile_features(Search_Engine PRIVATE cxx_std_17)
-target_link_libraries(Search_Engine PRIVATE pqxx)
-target_link_libraries(Search_Engine PRIVATE pugixml)
-target_link_libraries(Search_Engine PRIVATE ${OPENSSL_LIBRARIES})
-target_link_libraries(Search_Engine PRIVATE  ${PostgreSQL_LIBRARIES})
-if(WIN32)
-    target_link_libraries(Search_Engine PRIVATE ws2_32 wsock32)
-endif()
+
+
+# ====================================================================
+# 4. ЛИНКОВКА 
+# ====================================================================
+
+target_link_libraries(Search_Engine PRIVATE
+    # Boost 
+    Boost::boost # <--- ИСПРАВЛЕНО: Используем общую цель Boost::boost
+    
+    # libpqxx 
+    libpqxx::pqxx 
+
+    # pugixml 
+    pugixml
+
+    # OpenSSL 
+    OpenSSL::SSL
+    OpenSSL::Crypto
+
+    # WIN32 специфичные библиотеки
+    ws2_32
+    wsock32
+)

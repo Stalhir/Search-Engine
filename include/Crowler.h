@@ -5,6 +5,7 @@
 #include <string>
 #include <unordered_set>
 #include <vector>
+#include <atomic>
 
 class Crowler
 {
@@ -14,6 +15,8 @@ indexer& indexer_;
 ThreadPool& threadPool;
 std::unordered_set<std::string> visited_urls;
 std::mutex visited_mutex;
+std::mutex indexer_mutex;
+std::atomic<int> tasks_count{ 0 };
 
 int maxDeep;
 public: //FOR TEST THIS PRIVATE
@@ -34,6 +37,6 @@ bool TryAddUrl(std::string url_key);
 
     Crowler(httpclient& client, indexer& idx, ThreadPool& pool, int maxDeep);
 
-
+    void WaitUntilDone();
 };
 

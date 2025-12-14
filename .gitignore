@@ -4,6 +4,23 @@ lib/boost/*.lib
 lib/boost/*.dll
 lib/boost/*.exe
 
+# Visual Studio / CMake Caching Files
+.vs/
+*.vsidx
+*.ipch
+*.VC.db
+*.wsuo
+
+# Build files / Directories (если они не должны быть в Git)
+# Если lib/boost - это ваша библиотека, которая не должна быть в репо, раскомментируйте
+# lib/boost/
+
+# Файлы сборки (если они не в .vs)
+*obj/
+*bin/
+
+# Файлы логов и прочее
+*.log
 
 cmake-build-*/
 build/

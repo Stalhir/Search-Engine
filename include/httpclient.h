@@ -15,7 +15,7 @@ class httpclient : public std::enable_shared_from_this<httpclient>// помог�
 {
 private:
     boost::asio::ssl::context ctx{asio::ssl::context::tls_client};
-    asio::io_context ioc;
+    //asio::io_context ioc;
 
     static std::once_flag open_ssl_init_flag_;
     static void InitializeOpenSSL();
