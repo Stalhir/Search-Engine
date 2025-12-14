@@ -1,6 +1,6 @@
 ﻿#pragma once
 #include <pqxx/pqxx>
-
+#include <mutex>
 
 //pqxx::work tx(Con);
 // примеры tx.exec("DROP TABLE IF EXISTS Phone;"); && tx.exec("create table if not exists User_ ("
@@ -12,7 +12,7 @@ class DataBase
 {
 public:
     pqxx::connection connection_;
-
+    std::mutex connection_mutex_;
 
     DataBase(pqxx::connection&& connection) noexcept;
 
@@ -32,6 +32,8 @@ public:
 
     void InsertPageWord(std::string pageId, std::string wordId, std::string count, pqxx::work& tx);
 
-    std::string SearchWord(std::string word);
-    std::string SearchPage(std::string url);
+    std::string SearchWord(std::string word, pqxx::nontransaction& tx);
+    std::string SearchPage(std::string url, pqxx::nontransaction& tx);
+
+    std::vector<std::string> SearchPages(const std::string& query);
 };

@@ -55,23 +55,19 @@ void DataBase::InsertPageWord(std::string pageId, std::string wordId, std::strin
 
 };
 
-std::string DataBase::SearchWord(std::string word) {
-    pqxx::work tx(connection_);
-
-    std::string safe_word = tx.quote(word);
-
+std::string DataBase::SearchWord(std::string word, pqxx::nontransaction& tx) {
+    std::string safe_word = tx.quote(word); // Используем tx для quote
     std::string sql = "SELECT id FROM Words WHERE word = " + safe_word + ";";
 
-    pqxx::result res = tx.exec(sql);
+    pqxx::result res = tx.exec(sql); // Используем tx для exec
 
     if (res.empty()) return "";
     return res[0][0].as<std::string>();
 };
-std::string DataBase::SearchPage(std::string url) {
-    pqxx::work tx(connection_);
+
+std::string DataBase::SearchPage(std::string url, pqxx::nontransaction& tx) {
 
     std::string safe_url = tx.quote(url);
-
     std::string sql = "SELECT id FROM Pages WHERE url = " + safe_url + ";";
 
     pqxx::result res = tx.exec(sql);
@@ -79,6 +75,69 @@ std::string DataBase::SearchPage(std::string url) {
     if (res.empty()) return "";
     return res[0][0].as<std::string>();
 };
+
+std::vector<std::string> DataBase::SearchPages(const std::string& query) {
+    std::lock_guard<std::mutex> lock(connection_mutex_);
+    pqxx::nontransaction tx(connection_);
+    std::vector<std::string> word_ids;
+
+    // 1. Токенизация запроса
+    std::stringstream ss(query);
+    std::string word;
+    int query_word_count = 0;
+
+    // 2. Поиск ID для каждого слова
+    while (ss >> word) {
+        std::transform(word.begin(), word.end(), word.begin(), ::tolower);
+        std::string id = SearchWord(word,tx); // Теперь использует nontransaction
+
+        if (!id.empty()) {
+            word_ids.push_back(id);
+            query_word_count++;
+        }
+    }
+
+    if (word_ids.empty() || query_word_count == 0) {
+        return {};
+    }
+
+    // 3. Формирование списка ID для IN (...)
+    std::string word_ids_list;
+    for (size_t i = 0; i < word_ids.size(); ++i) {
+        word_ids_list += word_ids[i];
+        if (i < word_ids.size() - 1) {
+            word_ids_list += ", ";
+        }
+    }
+
+    // 4. Формирование финального SQL-запроса
+    std::string sql = R"(
+        SELECT
+            P.url
+        FROM
+            Pages P
+        JOIN
+            Page_Word PW ON P.id = PW.page_id
+        WHERE
+            PW.word_id IN ( )" + word_ids_list + R"()
+        GROUP BY
+            P.id, P.url
+        HAVING
+            COUNT(DISTINCT PW.word_id) = )" + std::to_string(query_word_count) + R"(
+        ORDER BY
+            SUM(PW.count) DESC;
+    )";
+
+    // 5. Выполнение запроса и сбор результатов
+    pqxx::result res = tx.exec(sql);
+
+    std::vector<std::string> results;
+    for (const auto& row : res) {
+        results.push_back(row[0].as<std::string>());
+    }
+
+    return results;
+}
 
 DataBase::DataBase(DataBase&& other) noexcept
     : connection_(std::move(other.connection_))

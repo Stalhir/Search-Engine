@@ -5,7 +5,7 @@
 #include <iostream>
 #include <memory>
 #include <string>
-
+#include "DataBase.h"
 namespace beast = boost::beast;
 namespace http = beast::http;
 namespace net = boost::asio;
@@ -19,7 +19,7 @@ using tcp = boost::asio::ip::tcp;
 class session : public std::enable_shared_from_this<session>
 {
 public:
-    session(tcp::socket socket, ssl::context& ctx);
+    session(tcp::socket socket, ssl::context& ctx, std::shared_ptr<DataBase> db);
 
     void run();
 
@@ -28,6 +28,7 @@ private:
     beast::flat_buffer buffer_{8192};
     http::request<http::dynamic_body> request_;
     http::response<http::dynamic_body> response_;
+    std::shared_ptr<DataBase> db;
 
     void read_request();
 
@@ -52,12 +53,13 @@ class http_server
 {
 public:
     http_server(net::io_context& ioc, unsigned short port,
-                const std::string& cert_file, const std::string& key_file);
+                const std::string& cert_file, const std::string& key_file, std::shared_ptr<DataBase> db);
 
 private:
     net::io_context& ioc_;
     tcp::acceptor acceptor_;
     ssl::context ctx_;
+    std::shared_ptr<DataBase> db;
 
     void do_accept();
 

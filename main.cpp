@@ -22,7 +22,7 @@ try
     }
     std::cout << "OpenSSL DLL loaded successfully!" << std::endl;
 */
-/*
+
     std::cout<< "Main Thread id: "<< std::this_thread::get_id() << std::endl;
 
     InitSearchEngine init("C:\\Users\\askoy\\Desktop\\search engine\\setting.ini");
@@ -34,7 +34,7 @@ try
 
     indexer_.database.InitDB();
 
-    ThreadPool pool(1);
+    ThreadPool pool(16);
 
     Crowler TEST(httpclient, indexer_, pool,3);
 
@@ -45,7 +45,7 @@ try
     testurl.port = "443";
     testurl.target = "/rfc/rfc2606.html";
 
-    httpclient.download(testurl.host, testurl.port, testurl.target);
+    //httpclient.download(testurl.host, testurl.port, testurl.target);
     //OpenSSL не потокобезопасен
     //TEST.AddInitialUrl(testurl);
 
@@ -56,14 +56,17 @@ try
     testurl.target = "/";
 
     //TEST.Work(testurl, 1);
-*/
+
+    DataBase  test(init.SetForDB());
+    std::shared_ptr<DataBase> db_ptr =
+        std::make_shared<DataBase>(init.SetForDB());
 
     auto port = static_cast<unsigned short>(10322);
     std::string cert_file = "C:\\Users\\askoy\\Desktop\\search engine\\opensslsertificate\\server.crt";
     std::string key_file = "C:\\Users\\askoy\\Desktop\\search engine\\opensslsertificate\\server.key";
 
     net::io_context ioc;
-    http_server server(ioc, port, cert_file, key_file);
+    http_server server(ioc, port, cert_file, key_file, db_ptr);
 
     std::cout << "HTTPS сервер запущен на порту " << port << std::endl;
     ioc.run();

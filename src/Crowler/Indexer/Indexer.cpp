@@ -293,11 +293,20 @@ std::unordered_map<std::string, int> indexer::SeparateWords(std::string response
 void indexer::AddToDB(const std::unordered_map<std::string, int>& words, ParsedUrl url)
 {
 
-    std::lock_guard<std::mutex> lock(mutDB);
+    //std::lock_guard<std::mutex> lock(mutDB);
     pqxx::work tx(database.connection_);
 
+    std::string protocol;
+    if (url.port == "443") {
+        protocol = "https://";
+    } else if (url.port == "80") {
+        protocol = "http://";
+    } else {
+        protocol = "http://";
+    }
 
-    std::string full_url = url.host + url.target;
+
+    std::string full_url = protocol + url.host + url.target;
     std::string pageid = database.InsertPage(full_url,tx);
     for (auto word : words) {
    // WORD: ░╬k∙╒hоу▲К░hїlд√╢q►vШn

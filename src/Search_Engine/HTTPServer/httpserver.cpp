@@ -1,11 +1,12 @@
 ﻿#include "httpserver.h"
-#include "DataBase.h"
+
 
 http_server::http_server(net::io_context& ioc, unsigned short port,
-            const std::string& cert_file, const std::string& key_file)
+            const std::string& cert_file, const std::string& key_file, std::shared_ptr<DataBase> db)
     : ioc_(ioc)
     , acceptor_(ioc, tcp::endpoint(tcp::v4(), port))
     , ctx_(ssl::context::tlsv12)
+    , db(std::move(db))
 {
     ctx_.set_options(
         ssl::context::default_workarounds |
@@ -26,7 +27,7 @@ void http_server::do_accept()
             if(!ec)
             {
                 // Создаем сессию для нового соединения
-                std::make_shared<session>(std::move(socket), ctx_)->run();
+                std::make_shared<session>(std::move(socket), ctx_, db)->run();
             }
 
             // Принимаем следующее соединение
@@ -34,8 +35,8 @@ void http_server::do_accept()
         });
 }
 
-session::session(tcp::socket socket, ssl::context& ctx)
-    : stream_(std::move(socket), ctx)
+session::session(tcp::socket socket, ssl::context& ctx, std::shared_ptr<DataBase> db)
+    : stream_(std::move(socket), ctx), db(std::move(db))
 {
 }
 
@@ -203,12 +204,34 @@ void session::run()
 
 std::string session::perform_search(const std::string& query)
 {
-
     if(query.empty())
-        return "<li>Write request</li>";
+        return "<li>Введите поисковый запрос.</li>";
 
-    // Пример статических результатов
-    return "<li>Result 1: " + query + "</li>\n" +
-           "<li>Result 2: " + query + "</li>\n" +
-           "<li>Result 3: " + query + "</li>";
+    // 1. Проверяем доступность базы данных
+    if (!db) {
+        // Если db не инициализирован (что маловероятно после наших изменений), возвращаем ошибку.
+        return "<li>Ошибка сервера: База данных недоступна.</li>";
+    }
+
+    std::vector<std::string> found_urls;
+    try {
+        // 2. Вызываем реализованный нами метод поиска
+        found_urls = db->SearchPages(query);
+    } catch (const std::exception& e) {
+        // Обработка ошибок БД (например, проблема с соединением или SQL)
+        return "<li>Ошибка при выполнении поиска в БД: " + std::string(e.what()) + "</li>";
+    }
+
+    // 3. Форматируем результаты в HTML
+    std::string results_html;
+    if (found_urls.empty()) {
+        results_html = "<li>По запросу **" + query + "** ничего не найдено.</li>";
+    } else {
+        // Каждую найденную URL-строку форматируем как элемент списка с гиперссылкой
+        for (const auto& url : found_urls) {
+            results_html += "<li><a href=\"" + url + "\">" + url + "</a></li>\n";
+        }
+    }
+
+    return results_html;
 }
