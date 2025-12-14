@@ -33,9 +33,9 @@ try
 
     indexer_.database.InitDB();
 
-    ThreadPool pool(16);//1 поток окей - больше ошибка
+    ThreadPool pool(16);
 
-    Crowler TEST(httpclient, indexer_, pool,3);
+    Crowler TEST(httpclient, indexer_, pool,6);
 
 
 
@@ -66,7 +66,7 @@ try
     net::io_context ioc;
     http_server server(ioc, port, cert_file, key_file, db_ptr);
 
-    std::cout << "HTTPS сервер запущен на порту " << port << std::endl;
+    std::cout << "HTTPS server work on port: " << port << std::endl;
     ioc.run();
 
 

@@ -26,11 +26,8 @@ void http_server::do_accept()
         {
             if(!ec)
             {
-                // Создаем сессию для нового соединения
                 std::make_shared<session>(std::move(socket), ctx_, db)->run();
             }
-
-            // Принимаем следующее соединение
             do_accept();
         });
 }
@@ -79,7 +76,6 @@ void session::run()
         {
             send_search_form();
         }
-        // POST запрос - обработка поиска
         else if(method == http::verb::post && target == "/search")
         {
             handle_search();
@@ -120,16 +116,13 @@ void session::run()
 
     void session::handle_search()
     {
-        // Извлекаем тело POST запроса
+
         std::string body = beast::buffers_to_string(request_.body().data());
 
-        // Парсим параметр query (упрощенно)
         std::string query = parse_query(body);
 
-        // Выполняем поиск (ваша логика здесь)
         std::string results = perform_search(query);
 
-        // Формируем HTML с результатами
         std::string html = R"(
 <!DOCTYPE html>
 <html>
@@ -205,29 +198,20 @@ void session::run()
 std::string session::perform_search(const std::string& query)
 {
     if(query.empty())
-        return "<li>Введите поисковый запрос.</li>";
+        return "<li>Write query</li>";
 
-    // 1. Проверяем доступность базы данных
-    if (!db) {
-        // Если db не инициализирован (что маловероятно после наших изменений), возвращаем ошибку.
-        return "<li>Ошибка сервера: База данных недоступна.</li>";
-    }
 
     std::vector<std::string> found_urls;
     try {
-        // 2. Вызываем реализованный нами метод поиска
         found_urls = db->SearchPages(query);
     } catch (const std::exception& e) {
-        // Обработка ошибок БД (например, проблема с соединением или SQL)
-        return "<li>Ошибка при выполнении поиска в БД: " + std::string(e.what()) + "</li>";
+        return "<li>Problem: " + std::string(e.what()) + "</li>";
     }
 
-    // 3. Форматируем результаты в HTML
     std::string results_html;
     if (found_urls.empty()) {
-        results_html = "<li>По запросу **" + query + "** ничего не найдено.</li>";
+        results_html = "<li>For the query **" + query + "** nothing was found .</li>";
     } else {
-        // Каждую найденную URL-строку форматируем как элемент списка с гиперссылкой
         for (const auto& url : found_urls) {
             results_html += "<li><a href=\"" + url + "\">" + url + "</a></li>\n";
         }

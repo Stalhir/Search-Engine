@@ -85,8 +85,6 @@ std::string httpclient::download(std::string host,std::string port, std::string 
         req.set(http::field::host, host);
         req.target(target);
         req.set(http::field::user_agent, "HTTPCLIENT_CROWLER");
-        /* Ошибка «handshake: длина пакета слишком длинная (рутины SSL)» [asio.ssl:167772358] может возникать,
-         * когда сервер настроен для обработки HTTP-запросов через порт 443, а не протокола HTTPS*/
 
         boost::asio::ip::basic_resolver_results<asio::ip::tcp> resolver = resolver_.resolve(host, port);
 
