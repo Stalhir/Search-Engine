@@ -1,5 +1,6 @@
 #include "Indexer.h"
 #include <string>
+#include <regex>
 #include <vector>
 #include <iostream>
 #include <algorithm>
@@ -198,25 +199,26 @@ return response;
 
 std::vector<std::string> indexer::GetHrefs(std::string response)
 {
-    std::vector<std::string> test;
+    const std::regex href_regex("<a\\s+(?:[^>]*?\\s+)?href=\"([^\"]*)\"", std::regex::icase); 
 
-    pugi::xml_document doc;
-    doc.load_string(response.c_str());
+    std::vector<std::string> hrefs;
+    std::smatch match;
+    std::string::const_iterator search_start(response.cbegin());
 
-    auto hrefs = doc.select_nodes("//a/@href");
-    std::cout << "Found " << hrefs.size() << " links:" << std::endl;
-    for (auto     attr : hrefs) {
-        std::string url = attr.attribute().value();
-
-        //std::cout << "URL: " << url << std::endl;
-
-        test.push_back(url);
+    int count = 0;
+    while (std::regex_search(search_start, response.cend(), match, href_regex))
+    {
+        std::string url = match[1].str();
+        hrefs.push_back(url);
+        search_start = match.suffix().first;
+        count++;
     }
-    return test;
+
+    return hrefs;
 }
 
 std::string indexer::DelHTML(std::string response)
-{//настроить чтоб HEAD вырезался полностью
+{
     bool in_tag{};
     std::string result;
 
