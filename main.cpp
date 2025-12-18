@@ -16,7 +16,7 @@ try
 
     std::cout<< "Main Thread id: "<< std::this_thread::get_id() << std::endl;
 
-    InitSearchEngine init("C:\\Users\\askoy\\Desktop\\SearchEngine\\Search-Engine\\setting.ini");
+    InitSearchEngine init("C:\\Users\\askoy\\Desktop\\search engine\\setting.ini");
 
       httpclient httpclient;
     indexer indexer_(init.SetForDB());
@@ -27,7 +27,6 @@ try
 
     Crowler TEST(httpclient, indexer_, pool,3);
 
-    // если программа падает раньше(тоесть мейн отрубается) обьекты уничтожается и происходит ошибка
 
     ParsedUrl testurl;
     testurl.host = "www.rfc-editor.org";
@@ -41,18 +40,18 @@ try
     testurl.port = "443";
     testurl.target = "/";
     //TEST.Work(testurl, 1);
-    //TEST.Work(testurl, 1);
+    TEST.Work(testurl, 1);
 
     std::shared_ptr<DataBase> db_ptr =
         std::make_shared<DataBase>(init.SetForDB());
 
     auto port = static_cast<unsigned short>(10322);
-    std::string cert_file = R"(C:\Users\askoy\Desktop\SearchEngine\Search-Engine\opensslsertificate\server.crt)";
-    std::string key_file = R"(C:\Users\askoy\Desktop\SearchEngine\Search-Engine\opensslsertificate\server.key)";
+    std::string cert_file = R"(C:\Users\askoy\Desktop\search engine\opensslsertificate\server.crt)";
+    std::string key_file = R"(C:\Users\askoy\Desktop\search engine\opensslsertificate\server.key)";
 
     net::io_context ioc;
     http_server server(ioc, port, cert_file, key_file, db_ptr);
-    TEST.WaitUntilDone();
+    //TEST.WaitUntilDone();
     std::cout << "HTTPS server work on port: " << port << std::endl;
     ioc.run();
 

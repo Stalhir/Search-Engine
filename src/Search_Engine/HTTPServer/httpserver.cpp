@@ -166,7 +166,7 @@ void session::run()
             response_,
             [self](beast::error_code ec, std::size_t)
             {
-                // После отправки закрываем SSL соединение
+
                 self->stream_.async_shutdown(
                     [self](beast::error_code ec)
                     {
@@ -183,12 +183,11 @@ void session::run()
         if(pos != std::string::npos)
         {
             std::string query = body.substr(pos + 6);
-            // Обрезаем до следующего &
+
             size_t end = query.find('&');
             if(end != std::string::npos)
                 query = query.substr(0, end);
 
-            // Заменяем + на пробелы (базовое декодирование)
             std::replace(query.begin(), query.end(), '+', ' ');
             return query;
         }

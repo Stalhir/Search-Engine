@@ -3,7 +3,7 @@
     {
       "name": "x64-Debug",
       "generator": "Ninja",
-      "cmakeToolchain": "C:\\dev\\tool\\vcpkg\\scripts\\buildsystems\\vcpkg.cmake",
+      "cmakeToolchain": "C:\\vcpkg\\scripts\\buildsystems",
       "configurationType": "Debug",
       "inheritEnvironments": [ "msvc_x64_x64" ],
       "buildRoot": "${projectDir}\\out\\build\\${name}",
