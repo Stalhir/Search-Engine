@@ -60,13 +60,43 @@ void Crowler::Work(ParsedUrl url, int deep)
         std::cout << "Max deep reached: " << deep << std::endl;
         return;
     }
-    std::string responce = connects.download(url.host, url.port, url.target);
 
-    if (!responce.empty()) {
-        indexer_.Index(responce, url);
+    auto responce = connects.download(url.host, url.port, url.target);
+
+    if (connects.checkRedirect(responce)) {//РїСЂРѕРІРµСЂРєР° РЅР° СЂРµРґРёСЂРµРєС‚
+        auto it = responce.find(http::field::location);
+        if (it != responce.end()) {
+            std::string redirect(it->value());
+            ParsedUrl parsed_url = indexer_.ParsingURL(redirect);
+            parsed_url = indexer_.FixURL(url, parsed_url);
+
+            if (!indexer_.CheckUrl(parsed_url)) {
+                tasks_count--;
+                return;
+            }
+
+            std::string key = MakeUrlKey(parsed_url);
+            if (!TryAddUrl(key))
+            {
+                tasks_count--;
+                return;
+            }
+            Work(parsed_url, deep);
+            std::cout << "REDIRECT WORK" << std::endl;
+            return;
+        }
+    }
+
+
+    //responce. С‚СѓС‚ Р±РµСЂС‘Рј СЃС‹Р»Р»РєСѓ Рё РїР°СЂСЃРёРј РµС‘
+    //ParsingURL()
+    //FixURL()
+    //CheckUrl()
+    if (!responce.body().empty()) {
+        indexer_.Index(responce.body(), url);
 
         if (deep < maxDeep) {
-            AddWork(responce, url, deep);
+            AddWork(responce.body(), url, deep);
         }
     }
     tasks_count--;
@@ -99,9 +129,8 @@ void Crowler::AddInitialUrl(const ParsedUrl& url) {
 void Crowler::WaitUntilDone() {
     std::cout << "Waiting for crawler to finish..." << std::endl;
 
-    // Ждем, пока счетчик активных задач не обнулится
+
     while (tasks_count > 0) {
-        // Спим 100 миллисекунд, чтобы не нагружать процессор
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
 

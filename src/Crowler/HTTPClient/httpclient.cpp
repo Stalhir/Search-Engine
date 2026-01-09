@@ -27,7 +27,7 @@ void httpclient::InitializeOpenSSL() {
     SSL_load_error_strings();
 }
 
-std::string httpclient::download_http(http::request<http::string_body> req,
+http::response<http::string_body> httpclient::download_http(http::request<http::string_body> req,
     http::response<http::string_body> resp, beast::flat_buffer buffer,asio::ip::basic_resolver_results<asio::ip::tcp> resolver)
 {
     asio::io_context ioc;
@@ -42,10 +42,10 @@ std::string httpclient::download_http(http::request<http::string_body> req,
 
     stream.close();
 
-    return resp.body();
+    return resp;
 }
 
-std::string httpclient::download_https( http::request<http::string_body> req,
+http::response<http::string_body> httpclient::download_https( http::request<http::string_body> req,
     http::response<http::string_body> resp, beast::flat_buffer buffer,asio::ip::basic_resolver_results<asio::ip::tcp> resolver, std::string host )
 {
     asio::io_context ioc;
@@ -66,10 +66,10 @@ std::string httpclient::download_https( http::request<http::string_body> req,
 
     beast::get_lowest_layer(stream).close();
 
-return resp.body();
+return resp;
 }
 
-std::string httpclient::download(std::string host,std::string port, std::string target)
+http::response<http::string_body> httpclient::download(std::string host,std::string port, std::string target)
 {
     //Настроить отлов ошибок надо
     //Разбить на функции
@@ -105,14 +105,24 @@ std::string httpclient::download(std::string host,std::string port, std::string 
     }
     catch (beast::error_code& ec) {
         std::cerr << ec.message() << std::endl;
-        return "";
+        return http::response<http::string_body>{};
     }
     catch (std::exception& e) {
         std::cerr << e.what() << std::endl;
-        return "";
+        return http::response<http::string_body>{};
     }
 }
 
+
+bool httpclient::checkRedirect(http::response<http::string_body> resp)
+{
+    if (resp.result_int() >= 300 && resp.result_int() <= 399 ) {
+        return true;
+    }
+
+
+return false;
+}
 
 httpclient::~httpclient()
 {

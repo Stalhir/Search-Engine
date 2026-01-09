@@ -23,13 +23,15 @@ private:
 public:
     httpclient();
 
-    std::string download(std::string host,std::string port, std::string target);
+    http::response<http::string_body> download(std::string host,std::string port, std::string target);
 
-    std::string download_http( http::request<http::string_body> req, http::response<http::string_body> resp,
+    http::response<http::string_body> download_http( http::request<http::string_body> req, http::response<http::string_body> resp,
         beast::flat_buffer buffer, asio::ip::basic_resolver_results<asio::ip::tcp> resolver);
 
-    std::string download_https( http::request<http::string_body> req, http::response<http::string_body> resp,
+    http::response<http::string_body> download_https( http::request<http::string_body> req, http::response<http::string_body> resp,
         beast::flat_buffer buffer, asio::ip::basic_resolver_results<asio::ip::tcp> resolver, std::string host);
+
+    bool checkRedirect(http::response<http::string_body> resp);
 
     ~httpclient();
 private:

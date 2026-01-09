@@ -16,7 +16,7 @@ try
 
     std::cout<< "Main Thread id: "<< std::this_thread::get_id() << std::endl;
 
-    InitSearchEngine init("C:\\Users\\askoy\\Desktop\\search engine\\setting.ini");
+    InitSearchEngine init(R"(C:\Users\askoy\Documents\PROJECT\Search-Engine\Search-Engine\setting.ini)");
 
       httpclient httpclient;
     indexer indexer_(init.SetForDB());
@@ -34,20 +34,20 @@ try
     testurl.target = "/rfc/rfc2606.html";
 
    
-
+//http://httpbin.org/relative-redirect/3
     
-    testurl.host = "www.wikipedia.org";
-    testurl.port = "443";
-    testurl.target = "/";
+    testurl.host = "httpbin.org";
+    testurl.port = "80";
+    testurl.target = "/relative-redirect/5";
     //TEST.Work(testurl, 1);
     TEST.Work(testurl, 1);
 
     std::shared_ptr<DataBase> db_ptr =
         std::make_shared<DataBase>(init.SetForDB());
 
-    auto port = static_cast<unsigned short>(10322);
-    std::string cert_file = R"(C:\Users\askoy\Desktop\search engine\opensslsertificate\server.crt)";
-    std::string key_file = R"(C:\Users\askoy\Desktop\search engine\opensslsertificate\server.key)";
+    auto port = static_cast<unsigned short>(443);
+    std::string cert_file = R"(C:\Users\askoy\Documents\PROJECT\Search-Engine\Search-Engine\opensslsertificate\server.crt)";
+    std::string key_file = R"(C:\Users\askoy\Documents\PROJECT\Search-Engine\Search-Engine\opensslsertificate\server.key)";
 
     net::io_context ioc;
     http_server server(ioc, port, cert_file, key_file, db_ptr);
