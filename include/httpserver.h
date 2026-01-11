@@ -12,7 +12,7 @@ namespace net = boost::asio;
 namespace ssl = boost::asio::ssl;
 using tcp = boost::asio::ip::tcp;
 
-// httpserver принимает запросы и создаёт обьекты сессии. сессии читают запросы отправляют ответы и тд
+
 
 
 

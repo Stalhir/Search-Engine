@@ -58,8 +58,7 @@ std::string DataBase::SearchWord(std::string word, pqxx::nontransaction& tx) {
     std::string safe_word = tx.quote(word); // Используем tx для quote
     std::string sql = "SELECT id FROM Words WHERE word = " + safe_word + ";";
 
-    pqxx::result res = tx.exec(sql); // Используем tx для exec
-
+    pqxx::result res = tx.exec(sql);
     if (res.empty()) return "";
     return res[0][0].as<std::string>();
 };
@@ -88,7 +87,7 @@ std::vector<std::string> DataBase::SearchPages(const std::string& query) {
     // 2. Поиск ID для каждого слова
     while (ss >> word) {
         std::transform(word.begin(), word.end(), word.begin(), ::tolower);
-        std::string id = SearchWord(word,tx); // Теперь использует nontransaction
+        std::string id = SearchWord(word,tx);
 
         if (!id.empty()) {
             word_ids.push_back(id);
@@ -100,7 +99,7 @@ std::vector<std::string> DataBase::SearchPages(const std::string& query) {
         return {};
     }
 
-    // 3. Формирование списка ID для IN (...)
+
     std::string word_ids_list;
     for (size_t i = 0; i < word_ids.size(); ++i) {
         word_ids_list += word_ids[i];
@@ -109,7 +108,7 @@ std::vector<std::string> DataBase::SearchPages(const std::string& query) {
         }
     }
 
-    // 4. Формирование финального SQL-запроса
+
     std::string sql = R"(
         SELECT
             P.url
@@ -127,7 +126,7 @@ std::vector<std::string> DataBase::SearchPages(const std::string& query) {
             SUM(PW.count) DESC;
     )";
 
-    // 5. Выполнение запроса и сбор результатов
+
     pqxx::result res = tx.exec(sql);
 
     std::vector<std::string> results;

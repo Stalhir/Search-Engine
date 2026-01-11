@@ -88,10 +88,7 @@ void Crowler::Work(ParsedUrl url, int deep)
     }
 
 
-    //responce. тут берём сыллку и парсим её
-    //ParsingURL()
-    //FixURL()
-    //CheckUrl()
+
     if (!responce.body().empty()) {
         indexer_.Index(responce.body(), url);
 

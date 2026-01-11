@@ -16,7 +16,7 @@ try
 
     std::cout<< "Main Thread id: "<< std::this_thread::get_id() << std::endl;
 
-    InitSearchEngine init(R"(C:\Users\askoy\Documents\PROJECT\Search-Engine\Search-Engine\setting.ini)");
+    InitSearchEngine init(R"(C:\Users\askoy\Documents\PROJECT\Search-Engine\Search-Engine\setting.ini)");// path to setting.ini
 
       httpclient httpclient;
     indexer indexer_(init.SetForDB());

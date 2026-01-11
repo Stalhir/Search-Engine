@@ -4,10 +4,6 @@
 #include <vector>
 #include <unordered_map>
 #include <mutex>
-// План:
-/*
-5. делим на отдельные слова .. передаём бд |
-*/
 
 
 struct ParsedUrl
@@ -29,7 +25,7 @@ public:
 public:
     indexer(DataBase&& database);
 
-    void Index(std::string response, ParsedUrl url); // результ не нужен сделаем просто функцию типо которая обьеденяет все
+    void Index(std::string response, ParsedUrl url);
 
 public:
 

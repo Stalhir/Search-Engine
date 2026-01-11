@@ -138,7 +138,7 @@ bool ThisOnlyTarget{false};
         url.erase(0, 7);
     }
     else if (url.find("https://") == 0) {
-        parsed_url.port = "443";// вместо чисел сделал так
+        parsed_url.port = "443";
         url.erase(0, 8);
     }
     else if (url[0] == '/' && url[1] == '/') {
@@ -323,15 +323,12 @@ void indexer::AddToDB(const std::unordered_map<std::string, int>& words, ParsedU
 
 void indexer::Index(std::string response, ParsedUrl url)
 {
-    //std::vector<std::string> hrefs = GetHrefs(response);
 
-
-    //std::string result = DelHead(response);
 
     response = DelHTML(response);
 
     response = RefactorText(response);
 
-    AddToDB(SeparateWords(response),url); //not problem
+    AddToDB(SeparateWords(response),url);
 
 }

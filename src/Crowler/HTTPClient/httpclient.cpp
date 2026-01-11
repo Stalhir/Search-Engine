@@ -71,9 +71,6 @@ return resp;
 
 http::response<http::string_body> httpclient::download(std::string host,std::string port, std::string target)
 {
-    //Настроить отлов ошибок надо
-    //Разбить на функции
-    //ДОбавить чтоб при HTTP он не делал шифрование
     try {
         beast::error_code ec;
         asio::io_context ioc;
