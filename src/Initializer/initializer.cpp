@@ -26,16 +26,17 @@ void InitSearchEngine::GetSettings()
     settings.push_back(parser.getvalue("search_engine","port"));
 }
 
-/*
-Crowler&& InitSearchEngine::SetForCrowler() // rvalue чтоб сразу принималось.
-{
-return Crowler();
-}
-*/
 
-SearchEngine InitSearchEngine::SetForSE()
+Crowler InitSearchEngine::SetForCrowler(httpclient& client, indexer& idx, ThreadPool& pool)
 {
-return SearchEngine();
+return Crowler(client, idx, pool, settings[5], std::stoi(settings[6]));
+}
+
+
+SearchEngine InitSearchEngine::SetForSE(net::io_context &ioc, const std::string &cert_file,
+    const std::string &key_file, std::shared_ptr<DataBase> db)
+{
+return SearchEngine(ioc, std::stoi(settings[7]) ,cert_file,key_file,db);
 }
 
 DataBase InitSearchEngine::SetForDB() {

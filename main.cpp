@@ -25,9 +25,9 @@ try
 
     ThreadPool pool(16);
 
-    Crowler TEST(httpclient, indexer_, pool,3);
+    Crowler TEST(init.SetForCrowler(httpclient, indexer_, pool ));
 
-
+    TEST.StartCrowler();
     ParsedUrl testurl;
     testurl.host = "www.rfc-editor.org";
     testurl.port = "443";
@@ -40,7 +40,7 @@ try
     testurl.port = "80";
     testurl.target = "/relative-redirect/5";
     //TEST.Work(testurl, 1);
-    TEST.Work(testurl, 1);
+
 
     std::shared_ptr<DataBase> db_ptr =
         std::make_shared<DataBase>(init.SetForDB());

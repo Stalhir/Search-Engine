@@ -2,8 +2,8 @@
 #include  <iostream>
 #include <future>
 
-Crowler::Crowler(httpclient& client, indexer& idx, ThreadPool& pool, int maxDeep = 1)
-: connects(client), indexer_(idx), threadPool(pool), maxDeep(maxDeep)
+Crowler::Crowler(httpclient& client, indexer& idx, ThreadPool& pool,  std::string StartPage, int maxDeep)
+: connects(client), indexer_(idx), threadPool(pool),  StartPage(StartPage) , maxDeep(maxDeep)
 {
     visited_urls.reserve(10000);
 }
@@ -132,4 +132,13 @@ void Crowler::WaitUntilDone() {
     }
 
     std::cout << "Crawler finished work!" << std::endl;
+}
+
+void Crowler::StartCrowler() {
+    ParsedUrl parsed_url = indexer_.ParsingURL(StartPage);
+    if (!indexer_.CheckUrl(parsed_url)) {
+        throw std::logic_error("This is not url");
+    }
+
+    this->Work(parsed_url, 1);
 }

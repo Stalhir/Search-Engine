@@ -17,9 +17,13 @@ std::unordered_set<std::string> visited_urls;
 std::mutex visited_mutex;
 std::mutex indexer_mutex;
 std::atomic<int> tasks_count{ 0 };
+std::string StartPage{};
 
 int maxDeep;
+
+
 public: //FOR TEST THIS PRIVATE
+
 void Work(ParsedUrl url, int deep); // прокидывается в пулл потоков. Скачивает и Индеексирует страницу
 
 
@@ -29,13 +33,13 @@ std::string Crowler::MakeUrlKey( ParsedUrl url);
 
 bool TryAddUrl(std::string url_key);
 
-
+void StartCrowler();
 
     public:
 
     void AddInitialUrl(const ParsedUrl& url);
 
-    Crowler(httpclient& client, indexer& idx, ThreadPool& pool, int maxDeep);
+    Crowler(httpclient& client, indexer& idx, ThreadPool& pool, std::string StartPage, int maxDeep);
 
     void WaitUntilDone();
 };

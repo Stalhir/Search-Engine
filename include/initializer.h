@@ -17,9 +17,10 @@ public:
 
     DataBase SetForDB();
 
-    SearchEngine SetForSE();
+    SearchEngine SetForSE(net::io_context &ioc, const std::string &cert_file,
+    const std::string &key_file, std::shared_ptr<DataBase> db);
 
-    Crowler&& SetForCrowler();
+    Crowler SetForCrowler(httpclient& client, indexer& idx, ThreadPool& pool);
 public:
 
     InitSearchEngine(std::string path);
