@@ -28,18 +28,12 @@ try
     Crowler TEST(init.SetForCrowler(httpclient, indexer_, pool ));
 
     TEST.StartCrowler();
-    ParsedUrl testurl;
-    testurl.host = "www.rfc-editor.org";
-    testurl.port = "443";
-    testurl.target = "/rfc/rfc2606.html";
+
 
    
 //http://httpbin.org/relative-redirect/3
     
-    testurl.host = "httpbin.org";
-    testurl.port = "80";
-    testurl.target = "/relative-redirect/5";
-    //TEST.Work(testurl, 1);
+
 
 
     std::shared_ptr<DataBase> db_ptr =
@@ -50,7 +44,8 @@ try
     std::string key_file = R"(C:\Users\askoy\Documents\PROJECT\Search-Engine\Search-Engine\opensslsertificate\server.key)";
 
     net::io_context ioc;
-    http_server server(ioc, port, cert_file, key_file, db_ptr);
+    //http_server server(ioc, port, cert_file, key_file, db_ptr);
+    SearchEngine server_(init.SetForSE(ioc, cert_file, key_file, db_ptr));
     //TEST.WaitUntilDone();
     std::cout << "HTTPS server work on port: " << port << std::endl;
     ioc.run();
